@@ -1,0 +1,12 @@
+{
+  "name": "casa-pignataro-backend",
+  "version": "1.0.0",
+  "description": "Backend para la tienda de Casa Pignataro",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "author": "Santiago Taschetta",
+  "license": "ISC"
+}
