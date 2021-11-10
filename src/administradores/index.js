@@ -1,0 +1,12 @@
+import express from 'express'
+
+const router = express.Router()
+
+router.get('/', (req, res, next) => {
+  res.send({
+    success: false,
+    message: 'La ruta GET /adminisradores no esta implementada'
+  })
+})
+
+export default router
