@@ -2,7 +2,7 @@ import { InvalidPasswordError, MissingDataError, InvalidUsernameError } from "..
 
 export default ({ auth, hash, admins }) => ({
 
-  async getSesion({ request }) {    
+  async getSession({ request }) {    
     const username = request.query.username
     const password = request.query.password
 

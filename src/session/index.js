@@ -1,12 +1,7 @@
-import express from 'express'
+import useEndpoint from './_endpoint.js'
+import useRouter from './_router.js'
 
-const router = express.Router()
-
-router.get('/', (req, res) => {
-  res.send({
-    success: false,
-    message: 'Not implemented'
-  })
-})
+const endpoint = useEndpoint({ auth, hash, admins })
+const router = useRouter({ endpoint })
 
 export default router
