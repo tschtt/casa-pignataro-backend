@@ -9,12 +9,12 @@ export class MissingDataError extends Error {
   }
 }
 
-export class UserNotFoundError extends Error {
+export class InvalidUsernameError extends Error {
   constructor() {
     super(`No se encontró el usuario`)
-    this.name = 'UserNotFoundError'
+    this.name = 'InvalidUsernameError'
     if(Error.captureStackTrace) {
-      Error.captureStackTrace(this, UserNotFoundError)
+      Error.captureStackTrace(this, InvalidUsernameError)
     }
   }
 }
