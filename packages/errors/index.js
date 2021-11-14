@@ -9,6 +9,16 @@ export class MissingDataError extends Error {
   }
 }
 
+export class MissingAuthKeyError extends Error {
+  constructor() {
+    super('Error en @taschetta/auth: falta definir key')
+    this.name = 'MissingAuthKeyError'
+    if(Error.captureStackTrace) {
+      Error.captureStackTrace(this, MissingAuthKeyError)
+    }
+  }
+}
+
 export class InvalidUsernameError extends Error {
   constructor() {
     super(`No se encontró el usuario`)
