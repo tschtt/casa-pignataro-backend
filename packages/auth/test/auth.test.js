@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { mock } from "@taschetta/test"
+import { InvalidTokenError } from "@taschetta/errors";
 
 import useAuth from "../src/_controller.js"
 
@@ -8,15 +9,16 @@ const token = "JWT.TOKEN.EXAMPLE"
 const algorithm = 'ALGO'
 const expiration = 1600
 
-describe("the useAuth(dependencies, options) package", () => {
+describe("given the useAuth(dependencies, options) package", () => {
 
   let jwt
   let auth
 
   beforeEach(() => {
     jwt = {
-      sign: mock(() => token)
-    }    
+      sign: mock(() => token),
+      verify: mock(() => {})
+    }
     
     auth = useAuth(
       { jwt }, 
@@ -86,6 +88,62 @@ describe("the useAuth(dependencies, options) package", () => {
 
     })
 
+  })
+
+  describe('when the decode(token, options) method is called', () => {
+
+    it("sets the verifiers's secretOrPrivateKey from useAuth's options", () => {
+      auth.decode(token)
+      expect(jwt.verify.mock.calls[0][1]).to.equals(key)
+    })
+
+    it("sets the verifier's algorithms from useAuth's options", () => {
+      auth.decode(token)
+      expect(jwt.verify.mock.calls[0][2]).to.have.deep.property('algorithms', [algorithm])
+    })
+    
+    describe('and if the token is valid', () => {
+      
+      it("returns the decoded token's payload", async () => {
+        jwt.verify.mock.returns = { id: 1, code: 'ABC' }
+        const result = auth.decode(token)
+        expect(result).to.equals(jwt.verify.mock.returns)
+      })
+      
+    })
+
+    describe('and if the token is invalid', () => {
+      
+      it('throws an InvalidTokenError', async () => {
+        jwt.verify = mock(() => { throw new Error('Token Invalido') })
+        expect(() => auth.decode(token)).to.throw(InvalidTokenError)
+      })
+      
+    })
+    
+    describe('and if it recibes an options object', () => {
+      
+      describe("and it has a key property", () => {
+        
+        it("sets the verifier's secretOrPrivateKey with it", () => {
+          const key = "JWT.GENRATE.KEY"
+          auth.decode(token, { key })
+          expect(jwt.verify.mock.calls[0][1]).to.equals(key)
+        })
+        
+      })
+
+      describe("and it has an algorithm property", () => {
+        
+        it("sets the verifier's algorithms from it", () => {
+          const algorithm = 'OTRO'
+          auth.decode(token, { algorithm })
+          expect(jwt.verify.mock.calls[0][2]).to.have.deep.property('algorithms', [algorithm])
+        })
+        
+      })
+
+    })
     
   })
   
