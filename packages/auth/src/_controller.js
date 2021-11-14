@@ -1,6 +1,9 @@
-import { InvalidTokenError } from "@taschetta/errors"
+import { InvalidTokenError, MissingAuthKeyError } from "@taschetta/errors"
 
-export default function useAuth({ jwt }, { key, expiration, algorithm }) {
+export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = 'HS256' } = {}) {
+  if(!key) {
+    throw new MissingAuthKeyError()
+  }
   return {
 
     generate(payload = {}, options = {}) {
@@ -9,7 +12,7 @@ export default function useAuth({ jwt }, { key, expiration, algorithm }) {
       
       jwt_options.expiresIn = options.expiration || expiration
       jwt_options.algorithm = options.algorithm || algorithm
-      
+    
       return jwt.sign(payload, jwt_key, jwt_options)
     },
 

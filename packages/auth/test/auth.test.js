@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { mock } from "@taschetta/test"
-import { InvalidTokenError } from "@taschetta/errors";
+import { InvalidTokenError, MissingAuthKeyError } from "@taschetta/errors";
 
 import useAuth from "../src/_controller.js"
 
@@ -24,6 +24,14 @@ describe("given the useAuth(dependencies, options) package", () => {
       { jwt }, 
       { key, expiration, algorithm }
     )
+  })
+
+  describe("and option.key is undefined", () => {
+    
+    it('throws an MissingAuthKeyError', () => {
+      expect(() => useAuth({ jwt })).to.throw(MissingAuthKeyError)
+    })
+    
   })
   
   describe("when the generate(payload, options) method is called", () => {
