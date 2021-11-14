@@ -1,0 +1,5 @@
+{
+  "name": "@taschetta/errors",
+  "main": "index.js",
+  "type": "module"
+}
