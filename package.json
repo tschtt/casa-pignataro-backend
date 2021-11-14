@@ -10,6 +10,9 @@
   },
   "author": "Santiago Taschetta",
   "license": "ISC",
+  "workspaces": [
+    "packages/*"
+  ],
   "dependencies": {
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
