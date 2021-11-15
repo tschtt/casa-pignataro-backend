@@ -1,5 +1,5 @@
 {
-  "name": "hash",
+  "name": "@taschetta/hash",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
