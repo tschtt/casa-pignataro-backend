@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { mock } from '@taschetta/test'
 import { format } from 'mysql2'
-import useTable from '../src/_controller.js'
+import useTable from '../src/_table.js'
 
 const rows = [
   { id: 1, active: true,  code: 'AAA',   name: 'Amsdn Uniasd', age: 22 },
@@ -36,6 +36,103 @@ describe('the useTable(dependencies)({ name }) module', () => {
     it('returns an array of rows', async () => {
       const result = await table.findMany()
       expect(result).to.equals(rows)
+    })
+
+    describe('when it recibes an options object', () => {
+      
+      describe('and it has a limit property set', () => {
+
+        it('limits the result to it', async () => {
+          await table.findMany({}, { limit: 10 })  
+          checkQuery('SELECT * FROM `test` LIMIT 10')
+        })
+        
+      })
+
+      describe('and it has an offset property set', () => {
+        
+        it('selects all rows', async () => {
+          await table.findMany({}, { offset: 5 })
+          checkQuery('SELECT * FROM `test`')
+        })
+        
+      })
+
+      describe('and it has a limit and an offset property set', () => {
+
+        it('limits and offsets the results with them', async () => {
+          await table.findMany({}, { limit: 10, offset: 5 })  
+          checkQuery('SELECT * FROM `test` LIMIT 10 OFFSET 5')
+        })
+        
+      })
+
+      describe('and it has an orderBy property set', () => {
+
+        it('orders the results by it', async () => {
+          await table.findMany({}, { orderBy: 'nombre' })
+          checkQuery("SELECT * FROM `test` ORDER BY 'nombre'")
+        })
+        
+      })
+
+      describe('and it has an order property set', () => {
+        
+        it('selects all rows', async () => {
+          await table.findMany({}, { order: 5 })
+          checkQuery('SELECT * FROM `test`')
+        })
+        
+      })
+
+      describe('and it has an order and orderBy properties set', () => {
+
+        describe('and it is set to asc', () => {
+          
+          it('orders the results by it ascending', async () => {
+            await table.findMany({}, { order: 'asc', orderBy: 'nombre' })
+            await table.findMany({}, { order: 'ASC', orderBy: 'nombre' })
+            checkQuery("SELECT * FROM `test` ORDER BY 'nombre' ASC", { nth: 0 })
+            checkQuery("SELECT * FROM `test` ORDER BY 'nombre' ASC", { nth: 1 })
+          })
+          
+        })
+
+        describe('and it is set to desc', () => {
+          
+          it('orders the results by it descending', async () => {
+            await table.findMany({}, { order: 'desc', orderBy: 'nombre' })
+            await table.findMany({}, { order: 'DESC', orderBy: 'nombre' })
+            checkQuery("SELECT * FROM `test` ORDER BY 'nombre' DESC", { nth: 0 })
+            checkQuery("SELECT * FROM `test` ORDER BY 'nombre' DESC", { nth: 1 })
+          })
+          
+        })
+
+        describe('and it is set to any other thing', () => {
+
+          it('orders the results by it descending', async () => {
+            await table.findMany({}, { order: 'desc;DROP TABLE users;', orderBy: 'nombre' })
+            checkQuery("SELECT * FROM `test` ORDER BY 'nombre'")
+          })
+          
+        })
+
+        
+        
+      })
+
+      describe('and it has an only propertie set', () => {
+        
+        it('selects only those columns', async () => {
+          await table.findMany({}, { only: ['id'] })
+          await table.findMany({}, { only: ['id', 'nombre'] })
+          checkQuery("SELECT `id` FROM `test`", { nth: 0 })
+          checkQuery("SELECT `id`, `nombre` FROM `test`", { nth: 1 })
+        })
+        
+      })
+      
     })
     
     testQuery({
