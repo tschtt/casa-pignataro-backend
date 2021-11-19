@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import { mock } from '@taschetta/test'
 import { format } from 'mysql2'
+
+import useBuilder from '../src/_builder.js'
 import useTable from '../src/_table.js'
 
 const rows = [
@@ -16,14 +18,17 @@ const name = 'test'
 describe('the useTable(dependencies)({ name }) module', () => {
 
   let database
+  let builder
   let table
 
   beforeEach(() => {
     database = {
       query: mock(() => [rows, fields]) 
     }
+
+    builder = useBuilder({ format })
     
-    table = useTable({ database })(name)
+    table = useTable({ database, builder })(name)
   })
   
   describe('when the findMany(query, options) function is called', () => {

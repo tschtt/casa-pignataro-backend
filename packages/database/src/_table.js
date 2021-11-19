@@ -1,59 +1,31 @@
-import { format } from 'mysql2'
-import build from './_builder.js'
 
-export default ({ database }) => (name) => ({
+export default ({ database, builder: build }) => (table) => ({
   
-  async findMany(query = {}, { only, limit, offset, orderBy, order } = {}) {
-    let sql = []
-    let values = []
-    
-    if(only) {
-      sql.push('SELECT ?? FROM ??')
-      values.push(only, name)
-    } else {
-      sql.push('SELECT * FROM ??')
-      values.push(name)
-    }
-    
-    query = build.where(query)
-
-    if(query) {
-      sql.push('WHERE', query)
-    }
-
-    if(orderBy) {
-      sql.push('ORDER BY ?')
-      values.push(orderBy)
-
-      if(order) {
-        if(order.toLowerCase() === 'asc') {
-          sql.push('ASC')
-        }
-        if(order.toLowerCase() === 'desc') {
-          sql.push('DESC')
-        }
-      }
-    }
-
-    if(limit) {
-      sql.push('LIMIT ?')
-      values.push(limit)
-
-      if(offset) {
-        sql.push('OFFSET ?')
-        values.push(offset)
-      }      
-    }
-
-    sql = sql.join(' ')
-
-    const result = await database.query(sql, values)
-    
+  async query(expression = {}) {
+    const sql = build(expression)
+    const result = await database.query(sql)
     return result[0]
   },
+  
+  async findMany(expression = {}, { only, limit, offset, orderBy, order } = {}) {
+    const result = await this.query({
+      $select: { table, only },
+      $where: { expression },
+      $order: {orderBy, order },
+      $limit: { limit, offset },
+    })
 
-  async findOne(query = {}, options = {}) {
-    const result = await this.findMany(query, { ...options, limit: 1})
+    return result
+  },
+
+  async findOne(expression = {}, { only, offset, orderBy, order } = {}) {
+    const result = await this.query({
+      $select: { table, only },
+      $where: { expression },
+      $limit: { limit: 1, offset },
+      $order: {orderBy, order }
+    })
+
     return result[0]
   },
   

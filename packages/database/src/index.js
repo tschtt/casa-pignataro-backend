@@ -1,4 +1,5 @@
-import mysql from 'mysql2/promise'
+import mysql, { format } from 'mysql2/promise'
+import useBuilder from './_builder.js'
 import configTable from './_table.js'
 
 const database = await mysql.createConnection({
@@ -8,6 +9,7 @@ const database = await mysql.createConnection({
   database: 'pecomtos',
 })
 
-const useTable = configTable({ database })
+const builder = useBuilder({ format })
+const useTable = configTable({ database, builder })
 
 export default useTable
