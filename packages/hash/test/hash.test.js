@@ -1,5 +1,5 @@
 import { expect, use } from "chai";
-import { mock } from '@packages/test'
+import { mock } from './helpers/mock.js'
 
 import useHash from '../src/_controller.js'
 

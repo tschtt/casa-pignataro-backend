@@ -1,6 +1,6 @@
 import { InvalidTokenError, MissingAuthKeyError } from "../src/_errors.js";
 import { expect } from "chai";
-import { mock } from "@packages/test"
+import { mock } from "./helpers/mock.js"
 
 import useAuth from "../src/_controller.js"
 
