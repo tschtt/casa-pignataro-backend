@@ -12,8 +12,8 @@ class EnvVariableMissingError extends Error {
 }
 
 const vars = [
-  'PORT',
-  'URL',
+  'APP_PORT',
+  'APP_URL',
 ]
 
 vars.forEach(name => {

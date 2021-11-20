@@ -4,7 +4,7 @@ import admins from './admins/index.js'
 import company from './company/index.js'
 import session from './session/index.js'
 
-const URL = process.env.URL
+const URL = process.env.APP_URL
 
 const app = express()
 
