@@ -10,8 +10,10 @@ export default function mock(fn = () => {}) {
     mock.calls.push(args)
     const result = fn(...args)
 
-    if(mock.returns === undefined)
+    if(mock.returns === undefined) {
       return result
+    }
+    
     return mock.returns
   }
 
