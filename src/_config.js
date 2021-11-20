@@ -14,6 +14,11 @@ class EnvVariableMissingError extends Error {
 const vars = [
   'APP_PORT',
   'APP_URL',
+  'AUTH_KEY',
+  'DATABASE_NAME',
+  'DATABASE_HOST',
+  'DATABASE_USER',
+  'DATABASE_PASSWORD',
 ]
 
 vars.forEach(name => {
