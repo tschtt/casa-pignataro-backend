@@ -1,7 +1,7 @@
 import { expect, use } from "chai";
 import { mock } from './helpers/mock.js'
 
-import useHash from '../src/_controller.js'
+import useHash from '../src/hash.js'
 
 const stringPlain = 'STRING.PLAIN'
 const stringHashed = 'STRING.HASH'
