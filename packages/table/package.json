@@ -1,5 +1,5 @@
 {
-  "name": "@packages/database",
+  "name": "@packages/table",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
