@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import { mock } from './helpers/mock.js'
 import { format } from 'mysql2'
 
-import useBuilder from '../src/_builder.js'
-import useTable from '../src/_table.js'
+import useBuilder from '../src/builder.js'
+import useTable from '../src/table.js'
 
 const rows = [
   { id: 1, active: true,  code: 'AAA',   name: 'Amsdn Uniasd', age: 22 },
