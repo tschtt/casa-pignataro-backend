@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Backend para la tienda de Casa Pignataro",
   "type": "module",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "file": "node -r dotenv/config --",
-    "start": "nodemon -r dotenv/config src/index.js",
+    "start": "nodemon -r dotenv/config index.js",
     "test": "mocha"
   },
   "author": "Santiago Taschetta",

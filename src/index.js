@@ -1,8 +1,27 @@
-import './_config.js'
-import app from './_app.js'
+import express from 'express'
 
-const PORT = process.env.APP_PORT
+import admins from './admins/index.js'
+import company from './company/index.js'
+import session from './session/index.js'
 
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`)
+const URL = process.env.APP_URL
+
+const app = express()
+
+app.use('/admins', admins)
+app.use('/company', company)
+app.use('/session', session)
+
+app.get('/', (req, res, next) => {
+  res.send({
+    success: true,
+    message: "Welcome to Casa Pignataro's API",
+    links: [
+      `${URL}/admins`,
+      `${URL}/company/payment-methods`,
+      `${URL}/company/`,
+    ]
+  })
 })
+
+export default app
