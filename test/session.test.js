@@ -6,6 +6,10 @@ import useSesion from '../src/session/_endpoint.js'
 import mock from './helpers/mock.js'
 import throwsAsync from './helpers/throws-async.js'
 
+const token = 'BASIC.TOKEN.EXAMPLE'
+const accessToken = 'ACCESS.TOKEN.EXAMPLE'
+const refreshToken = 'REFRESH.TOKEN.EXAMPLE'
+
 const request = {
   query: {
     username: 'santi',
@@ -13,33 +17,35 @@ const request = {
   }
 }
 
-const token = 'TOKEN.EXAMPLE'
-
-const admin = {
-  id: 1,
-  username: 'santi',
-  password: '123456'
-}
-
 describe('the sesion endpoint', () => {
   
   let auth
   let hash
   let admins
+  let admin
   let sesion
   
   beforeEach(() => {
     auth = {
-      generate: mock(() => token)
+      generate: mock(() => token),
+      generateAccessToken: mock(() => accessToken),
+      generateRefreshToken: mock(() => refreshToken),
     }
 
     hash = {
       check: mock(() => true)
     }
     
-    admins = {
-      findOne: mock(() => admin)
+    admin = {
+      id: 1,
+      username: 'santi',
+      password: '123456'
     }
+
+    admins = {
+      findOne: mock(() => { return { ...admin } })
+    }
+
     
     sesion = useSesion({ auth, hash, admins })
   })
@@ -58,21 +64,31 @@ describe('the sesion endpoint', () => {
         expect(admins.findOne.mock.calls[0][1]).to.deep.equal({ hidePassword: false })
       })
 
-      it("checks if the password matches admin's password", async () => {
+      it("compares the passwords to see if they match", async () => {
         await sesion.getSession({ request })
         expect(hash.check.mock.calls[0][0]).to.equals(request.query.password)
         expect(hash.check.mock.calls[0][1]).to.equals(admin.password)
       })
 
-      it('signs the token with admin.id', async () => {
+      it('generates an access token', async () => {
         await sesion.getSession({ request })
-        expect(auth.generate.mock.calls[0][0]).to.deep.equals({ id: admin.id })
+        expect(auth.generateAccessToken.mock.calls[0][0]).to.deep.equals({ id: admin.id })
       })
 
-      it('returns an object with a success and token properties', async () => {
+      it('generates a refresh token with a duration of one hour', async () => {        
+        await sesion.getSession({ request })
+        expect(auth.generateRefreshToken.mock.calls[0][0]).to.deep.equals({ id: admin.id })
+      })
+
+      it('returns the admin data (without the password), the access token and the reresh token', async () => {
         const result = await sesion.getSession({ request })        
+
+        delete admin.password
+        
         expect(result.success).to.equals(true)
-        expect(result.token).to.equals(token)
+        expect(result.admin).to.deep.equals(admin)
+        expect(result.accessToken).to.equals(accessToken)
+        expect(result.refreshToken).to.equals(refreshToken)
       })
 
       describe('if the admin is not found', () => {

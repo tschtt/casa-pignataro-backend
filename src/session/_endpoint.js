@@ -10,23 +10,28 @@ export default ({ auth, hash, admins }) => ({
       throw new MissingDataError()
     }
 
-    const administrador = await admins.findOne({ username }, { hidePassword: false })
+    const admin = await admins.findOne({ username }, { hidePassword: false })
 
-    if(!administrador) {
+    if(!admin) {
       throw new InvalidUsernameError()
     }
     
-    const match = await hash.check(password, administrador.password)
+    const match = await hash.check(password, admin.password)
     
     if(!match) {
       throw new InvalidPasswordError()
     }
     
-    const token = auth.generate({ id: administrador.id })
+    const accessToken = auth.generateAccessToken({ id: admin.id })
+    const refreshToken = auth.generateRefreshToken({ id: admin.id })
+    
+    delete admin.password
 
     return {
       success: true,
-      token
+      accessToken,
+      refreshToken,
+      admin,
     }
   },
   
