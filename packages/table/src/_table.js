@@ -1,9 +1,9 @@
 
-export default ({ database, builder: build }) => (table) => ({
+export default ({ connection, builder: build }) => (table) => ({
   
   async query(expression = {}) {
     const sql = build(expression)
-    const result = await database.query(sql)
+    const result = await connection.query(sql)
     return result[0]
   },
   
