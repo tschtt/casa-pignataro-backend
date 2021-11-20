@@ -5,8 +5,8 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "file": "node --",
-    "start": "nodemon src/index.js",
+    "file": "node -r dotenv/config --",
+    "start": "nodemon -r dotenv/config src/index.js",
     "test": "mocha"
   },
   "author": "Santiago Taschetta",
