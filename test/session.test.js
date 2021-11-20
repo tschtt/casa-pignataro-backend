@@ -12,7 +12,7 @@ describe('the session endpoint', () => {
   let admin, request
   let token, accessToken, refreshToken
 
-  // Packages
+  // Modules
   let auth, hash
   
   // Table controllers
@@ -40,7 +40,7 @@ describe('the session endpoint', () => {
     accessToken = 'ACCESS.TOKEN.EXAMPLE'
     refreshToken = 'REFRESH.TOKEN.EXAMPLE'
  
-    // Packages
+    // Modules
     auth = {
       generate: mock((payload, options) => {
         switch (options.expiration) {
