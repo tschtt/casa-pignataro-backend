@@ -1,9 +1,9 @@
 {
   "name": "@packages/table",
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "main": "node src/index.js",
+    "main": "node index.js",
     "test": "mocha"
   },
   "devDependencies": {

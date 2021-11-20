@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import useHash from './_controller.js'
+import useHash from './src/_controller.js'
 
 const rounds = process.env.HASH_ROUNDS
 

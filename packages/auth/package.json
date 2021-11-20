@@ -1,6 +1,6 @@
 {
   "name": "@packages/auth",
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "mocha"
