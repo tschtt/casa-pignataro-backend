@@ -1,4 +1,4 @@
-import { InvalidTokenError, MissingAuthKeyError } from "./_errors.js"
+import { InvalidTokenError, MissingAuthKeyError } from "./errors.js"
 
 export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = 'HS256' } = {}) {
   if(!key) {

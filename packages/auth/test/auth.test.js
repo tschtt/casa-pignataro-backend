@@ -1,8 +1,8 @@
-import { InvalidTokenError, MissingAuthKeyError } from "../src/_errors.js";
+import { InvalidTokenError, MissingAuthKeyError } from "../src/errors.js";
 import { expect } from "chai";
 import { mock } from "./helpers/mock.js"
 
-import useAuth from "../src/_controller.js"
+import useAuth from "../src/auth.js"
 
 const key = "JWT.TOKEN.KEY"
 const token = "JWT.TOKEN.EXAMPLE"
