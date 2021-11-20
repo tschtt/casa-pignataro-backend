@@ -1,4 +1,4 @@
-import { InvalidTokenError, MissingAuthKeyError } from "@taschetta/errors"
+import { InvalidTokenError, MissingAuthKeyError } from "@packages/errors"
 
 export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = 'HS256' } = {}) {
   if(!key) {

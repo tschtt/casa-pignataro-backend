@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { mock } from "@taschetta/test"
-import { InvalidTokenError, MissingAuthKeyError } from "@taschetta/errors";
+import { mock } from "@packages/test"
+import { InvalidTokenError, MissingAuthKeyError } from "@packages/errors";
 
 import useAuth from "../src/_controller.js"
 

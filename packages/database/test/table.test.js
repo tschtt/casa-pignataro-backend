@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { mock } from '@taschetta/test'
+import { mock } from '@packages/test'
 import { format } from 'mysql2'
 
 import useBuilder from '../src/_builder.js'

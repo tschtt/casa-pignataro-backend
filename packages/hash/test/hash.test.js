@@ -1,5 +1,5 @@
 import { expect, use } from "chai";
-import { mock } from '@taschetta/test'
+import { mock } from '@packages/test'
 
 import useHash from '../src/_controller.js'
 

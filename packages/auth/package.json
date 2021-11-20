@@ -1,5 +1,5 @@
 {
-  "name": "@taschetta/auth",
+  "name": "@packages/auth",
   "main": "src/index.js",
   "type": "module",
   "scripts": {

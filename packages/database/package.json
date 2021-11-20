@@ -1,5 +1,5 @@
 {
-  "name": "@taschetta/database",
+  "name": "@packages/database",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
