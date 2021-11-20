@@ -1,12 +1,9 @@
-import express from 'express'
+import useTable from '@packages/table'
+import useController from './_controller.js'
+import useRouter from './_router.js'
 
-const router = express.Router()
+const table = useTable('admin')
 
-router.get('/', (req, res, next) => {
-  res.send({
-    success: false,
-    message: 'Not implemented'
-  })
-})
+export const controller = useController({ table })
 
-export default router
+export default useRouter()
