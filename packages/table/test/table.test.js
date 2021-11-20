@@ -17,18 +17,18 @@ const name = 'test'
 
 describe('the useTable(dependencies)({ name }) module', () => {
 
-  let database
+  let connection
   let builder
   let table
 
   beforeEach(() => {
-    database = {
+    connection = {
       query: mock(() => [rows, fields]) 
     }
 
     builder = useBuilder({ format })
     
-    table = useTable({ database, builder })(name)
+    table = useTable({ connection, builder })(name)
   })
   
   describe('when the findMany(query, options) function is called', () => {
@@ -168,7 +168,7 @@ describe('the useTable(dependencies)({ name }) module', () => {
   })
 
   function checkQuery(sql, { nth = 0 } = {}) {
-    expect(format(...database.query.mock.calls[nth])).to.equals(sql)
+    expect(format(...connection.query.mock.calls[nth])).to.equals(sql)
   }
 
   function testQuery({ method, before, after }) {
@@ -182,7 +182,7 @@ describe('the useTable(dependencies)({ name }) module', () => {
 
       sql = sql.join(' ')
       
-      expect(format(...database.query.mock.calls[nth])).to.equals(sql)
+      expect(format(...connection.query.mock.calls[nth])).to.equals(sql)
     }
 
     describe('and it recibes a query object', () => {
