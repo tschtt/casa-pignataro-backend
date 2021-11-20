@@ -3,7 +3,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "main": "node index.js",
+    "main": "node -r dotenv/config index.js",
     "test": "mocha"
   },
   "devDependencies": {
