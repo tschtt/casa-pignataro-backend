@@ -11,6 +11,8 @@ export default ({ format }) => {
     }
     
     const operators = {
+      
+      // Main operations
       $select({ table, only }) {
         if(only) {
           state.add('SELECT ?? FROM ??', [only, table])
@@ -18,33 +20,21 @@ export default ({ format }) => {
           state.add('SELECT * FROM ??', [table])
         }
       },
-      $where({ expression }) {
+      $update({ table, set }) {
+        state.add('UPDATE ?? SET ?', [table, set])
+      },
+      $delete({ table }) {
+        state.add('DELETE FROM ??', [table])
+      },
+
+      // Filter operations
+      $where(expression = {}) {
         const result = build(expression, { joint: ' AND ' })
         if(result) {
           state.add('WHERE ' + result)
         }      
       },
-      $limit({ limit, offset }) {
-        if(limit) {
-          state.add('LIMIT ?', [limit])
-          if(offset) {
-            state.add('OFFSET ?', [offset])
-          }      
-        }
-      },
-      $order({ orderBy, order }) {
-        if(orderBy) {
-          state.add('ORDER BY ?', [orderBy])
-          if(order) {
-            if(order.toLowerCase() === 'asc') {
-              state.add('ASC')
-            }
-            if(order.toLowerCase() === 'desc') {
-              state.add('DESC')
-            }
-          }
-        }
-      },
+      // Comparison
       $eq: ({ field, value }) => {
         return isNot 
           ? state.add('?? NOT LIKE ?', [field, value])
@@ -85,40 +75,72 @@ export default ({ format }) => {
           ? state.add('?? IN (?)', [field, value])
           : state.add('?? NOT IN (?)', [field, value])
       },
+      // Logical
       $not: ({ field, value }) => {
         const result = build({ [field]: value }, { isNot: !isNot })
         state.add(result)
       },
-      $and: ({ expressions = [] }) => {
+      $and: (expressions = []) => {
         const block = expressions.map(expression => build(expression)).join(') AND (')
         state.add(`(${block})`)
       },
-      $or: ({ expressions = [] }) => {
+      $or: (expressions = []) => {
         const block = expressions.map(expression => build(expression)).join(') OR (')
         state.add(`(${block})`)
       },
-      $nor: ({ expressions = [] }) => {
+      $nor: (expressions = []) => {
         const block = expressions.map(expression => build(expression, { isNot: true })).join(') OR (')
         state.add(`(${block})`)
       },
-      $nand: ({ expressions = [] }) => {
+      $nand: (expressions = []) => {
         const block = expressions.map(expression => build(expression, { isNot: true })).join(') AND (')
         state.add(`(${block})`)
-      }
+      },
+
+      // Limiting and sorting operations
+      $limit({ amount, offset }) {
+        if(amount) {
+          state.add('LIMIT ?', [amount])
+          if(offset) {
+            state.add('OFFSET ?', [offset])
+          }
+        }
+      },
+      $order({ by, sort }) {
+        if(by) {
+          state.add('ORDER BY ??', [by])
+          if(sort) {
+            if(sort.toLowerCase() === 'asc') {
+              state.add('ASC')
+            }
+            if(sort.toLowerCase() === 'desc') {
+              state.add('DESC')
+            }
+          }
+        }
+      },
     }
   
     const parse = (expression) => {
       const operations = []
-          
+      
       for (const name in expression) {
+        // if it's an operator like $select, $where, $limit, $and, etc
+        // all that dont operate on a specific column
         if(operators[name]) {
+          //add its value as a prop to the operator
           const props = expression[name]
-          operations.push({ expressions: props, ...props, operator: name })
-        } else {
+          operations.push({ operator: name, props })
+        } 
+        // if its not, its an operation on a colum
+        // like id: { $gt: 1, $lt: 10 }
+        else {
           const operators = expression[name]
+          // loop over every operation over the column
           for (const operator in operators) {
             const value = operators[operator]
-            operations.push({ field: name, operator, value })
+            // and add its name and its value as a prop to the operator
+            operations.push({ operator, props: { field: name, value } })
           }
         }
         
@@ -129,11 +151,12 @@ export default ({ format }) => {
   
     const run = (operations) => {
       for (const operation of operations) {
-        operators[operation.operator](operation)
+        operators[operation.operator](operation.props)
       }
   
       const sql = state.sql.join(joint)
       const values = state.values
+      
       return format(sql, values)
     }
   

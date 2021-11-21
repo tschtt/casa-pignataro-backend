@@ -7,23 +7,23 @@ export default ({ connection, builder: build }) => (table) => ({
     return result[0]
   },
   
-  async findMany(expression = {}, { only, limit, offset, orderBy, order } = {}) {
+  async findMany(expression = {}, { only, limit: amount, offset, orderBy: by, order: sort } = {}) {
     const result = await this.query({
       $select: { table, only },
-      $where: { expression },
-      $order: {orderBy, order },
-      $limit: { limit, offset },
+      $where: expression,
+      $order: { by, sort },
+      $limit: { amount, offset },
     })
 
     return result
   },
 
-  async findOne(expression = {}, { only, offset, orderBy, order } = {}) {
+  async findOne(expression = {}, { only, offset, orderBy: by, order: sort } = {}) {
     const result = await this.query({
       $select: { table, only },
-      $where: { expression },
-      $limit: { limit: 1, offset },
-      $order: {orderBy, order }
+      $where: expression,
+      $order: { by, sort },
+      $limit: { amount: 1, offset },
     })
 
     return result[0]
