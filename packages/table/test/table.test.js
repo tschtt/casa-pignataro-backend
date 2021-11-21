@@ -67,11 +67,110 @@ describe('the useTable(dependencies)({ name }) module', () => {
     
   })
 
+  describe('when the insertMany(data, options) function is called', () => {
+    
+    it('inserts an array of items to the table with the columns set from the first item', async () => {
+      await table.insertMany([
+        { id: 1, name: 'santi' },
+        { id: 2, name: 'vicky' },
+      ])
+      checkQuery("INSERT INTO `test` (`id`, `name`) VALUES (1, 'santi'), (2, 'vicky')")
+    })
+
+    it('returns the id of the first inserted row', async () => {
+      connection.query.mock.returns = [{ insertId: 3 }]
+      const result = await table.insertMany([
+        { id: 1, name: 'santi' },
+        { id: 2, name: 'vicky' },
+      ])
+      expect(result).to.equals(3)
+    })
+    
+  })
+
+  describe('when the insertOne(data, options) function is called', () => {
+    
+    it('interts a row to the table with the data provided', async () => {
+      await table.insertOne({ id: 1, name: 'santi' })
+      checkQuery("INSERT INTO `test` (`id`, `name`) VALUES (1, 'santi')")
+    })
+
+    it("returns the row's id", async () => {
+      connection.query.mock.returns = [{ insertId: 12 }]
+      const result = await table.insertOne({ id: 1, name: 'santi' })
+      expect(result).to.equals(12)
+    })
+    
+  })
+
+  describe('when the updateMany(query, data, options) function is called', () => {
+
+    it('updates the matched rows with the data provided', async () => {
+      await table.updateMany({ email: { $like: 'gmail' } }, { active: false })
+      checkQuery("UPDATE `test` SET `active` = false WHERE `email` LIKE '%gmail%'")
+    })
+
+    it('returns the number of updated rows', async () => {
+      connection.query.mock.returns = [{ affectedRows: 5 }]
+      const result = await table.updateMany({ email: { $like: 'gmail' } }, { active: false })
+      expect(result).to.equals(5)
+    })
+    
+  })
+
+  describe('when the updateOne(query, data, options) function is called', () => {
+    
+    it('updates the first row matched with the data provided', async () => {
+      await table.updateOne({ email: { $like: 'gmail' } }, { active: false })
+      checkQuery("UPDATE `test` SET `active` = false WHERE `email` LIKE '%gmail%' LIMIT 1")
+    })
+
+    it('returns true if a row was updated', async () => {
+      connection.query.mock.returns = [{ affectedRows: 1 }]
+      const result = await table.updateOne({ email: { $like: 'gmail' } }, { active: false })
+      expect(result).to.equals(true)
+    })
+
+    it('returns false it no row was updated', async () => {
+      connection.query.mock.returns = [{ affectedRows: 0 }]
+      const result = await table.updateOne({ email: { $like: 'gmail' } }, { active: false })
+      expect(result).to.equals(false)
+    })
+    
+  })  
+
   describe('when the removeMany(query, options) function is called', () => {
 
-    it('removes all rows from the table', async () => {
-      await table.removeMany()
-      checkQuery('DELETE FROM `test`')
+    it('removes all matched rows from the table', async () => {
+      await table.removeMany({ name: 'santi' })
+      checkQuery("DELETE FROM `test` WHERE `name` LIKE 'santi'")
+    })
+    
+    it('returns the number of rows removed', async () => {
+      connection.query.mock.returns = [{ affectedRows: 2 }]
+      const result = await table.removeMany({ fkAdmin: 1 })
+      expect(result).to.equals(2)
+    })
+    
+  })
+
+  describe('when the removeOne(query, options) function is called', () => {
+
+    it('removes the first matched row from the table', async () => {
+      await table.removeOne({ name: 'santi' })
+      checkQuery("DELETE FROM `test` WHERE `name` LIKE 'santi' LIMIT 1")
+    })
+    
+    it('returns true if a row was removed', async () => {
+      connection.query.mock.returns = [{ affectedRows: 1 }]
+      const result = await table.removeOne({ fkAdmin: 1 })
+      expect(result).to.equals(true)
+    })
+
+    it('returns false if no row was removed', async () => {
+      connection.query.mock.returns = [{ affectedRows: 0 }]
+      const result = await table.removeOne({ fkAdmin: 1 })
+      expect(result).to.equals(false)
     })
     
   })

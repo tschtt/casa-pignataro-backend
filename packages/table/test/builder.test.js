@@ -29,6 +29,17 @@ describe('the useBuilder(dependencies)(expression, options) module', () => {
     })
     
   })
+  
+  describe('when the expression contains an $insert: { table, rows, columns? } operation', () => {
+
+    it('returns an insert query', () => {
+      const resultA = builder({ $insert: { table: 'admin', values: [{ id: 1, code: '123', name: 'Ounasbew Amainewb' }] } })
+      const resultB = builder({ $insert: { table: 'admin', value: { id: 1, code: '123', name: 'Ounasbew Amainewb' } } })
+      expect(resultA).to.equals("INSERT INTO `admin` (`id`, `code`, `name`) VALUES (1, '123', 'Ounasbew Amainewb')")
+      expect(resultB).to.equals("INSERT INTO `admin` (`id`, `code`, `name`) VALUES (1, '123', 'Ounasbew Amainewb')")
+    })
+    
+  })
 
   describe('when the expression contains a $update: { table, set } operation', () => {
     
@@ -50,11 +61,59 @@ describe('the useBuilder(dependencies)(expression, options) module', () => {
 
   describe('when the expression contains a $where: expression operation', () => {
 
+    describe('and the expression contains a [column]: value', () => {
+
+      describe('and the value is a string', () => {
+        
+        it('matches all rows equal to it ($eq operator)', () => {
+          const result = builder({ $where: { name: 'santiago' }})
+          expect(result).to.equals("WHERE `name` LIKE 'santiago'")
+        })
+        
+      })
+
+      describe('and the value is a number', () => {
+        
+        it('matches all rows equal to it ($eq operator)', () => {
+          const result = builder({ $where: { id: 1 }})
+          expect(result).to.equals("WHERE `id` LIKE 1")
+        })
+        
+      })
+
+      describe('and the value is a boolean', () => {
+        
+        it('matches all rows equal to it ($eq operator)', () => {
+          const result = builder({ $where: { active: true }})
+          expect(result).to.equals("WHERE `active` LIKE true")
+        })
+        
+      })
+
+      describe('and the value is an array', () => {
+
+        it('matches all rows equal to one in the array ($in operator)', async () => {
+          const result = builder({ $where: { name: ['santi', 'vicky'] }})
+          expect(result).to.equals("WHERE `name` IN ('santi', 'vicky')")
+        })
+        
+      })
+      
+    })
+
     describe('and the expression contains a [column]: expression operation', () => {
+
+      describe('and it has a $like propertie set', () => {
+
+        it('matches all rows that contains it', () => {
+          const result = builder({ $where: { name: { $like: 's' } } })
+          expect(result).to.equals("WHERE `name` LIKE '%s%'")          
+        })
+      })
 
       describe('and it has an $eq propertie set', () => {
         
-        it('matches al rows equal to it', () => {
+        it('matches all rows equal to it', () => {
           const result = builder({ $where: { id: { $eq: 1 }, code: { $eq: 'hola' } } })
           expect(result).to.equals("WHERE `id` LIKE 1 AND `code` LIKE 'hola'")
         })

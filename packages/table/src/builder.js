@@ -1,3 +1,4 @@
+import { TypeNotSupportedError } from './errors.js'
 
 export default ({ format }) => {
   return function build(expression, { isNot = false, joint = ' '} = {}) {
@@ -20,6 +21,22 @@ export default ({ format }) => {
           state.add('SELECT * FROM ??', [table])
         }
       },
+      $insert({ table, value, values, columns }) {
+        if(values) {
+          state.add('INSERT INTO ?? (??) VALUES ?', [
+            table, 
+            Object.keys(values[0]),
+            values.map(value => Object.values(value))
+          ])
+        }
+        else if(value) {
+          state.add('INSERT INTO ?? (??) VALUES (?)', [
+            table, 
+            Object.keys(value),
+            Object.values(value)
+          ])
+        }
+      },
       $update({ table, set }) {
         state.add('UPDATE ?? SET ?', [table, set])
       },
@@ -35,6 +52,13 @@ export default ({ format }) => {
         }      
       },
       // Comparison
+      $like: ({ field, value }) => {
+        value = `%${value}%`
+        
+        return isNot
+          ? state.add('?? NOT LIKE ?', [field, value])
+          : state.add('?? LIKE ?', [field, value])
+      },
       $eq: ({ field, value }) => {
         return isNot 
           ? state.add('?? NOT LIKE ?', [field, value])
@@ -123,7 +147,6 @@ export default ({ format }) => {
   
     const parse = (expression) => {
       const operations = []
-      
       for (const name in expression) {
         // if it's an operator like $select, $where, $limit, $and, etc
         // all that dont operate on a specific column
@@ -133,15 +156,32 @@ export default ({ format }) => {
           operations.push({ operator: name, props })
         } 
         // if its not, its an operation on a colum
-        // like id: { $gt: 1, $lt: 10 }
+        // like id: { $gt: 1, $lt: 10 }, id: 1, etc
         else {
           const operators = expression[name]
-          // loop over every operation over the column
-          for (const operator in operators) {
-            const value = operators[operator]
-            // and add its name and its value as a prop to the operator
-            operations.push({ operator, props: { field: name, value } })
+          switch (typeof operators) {
+            case 'string':
+            case 'number':
+            case 'boolean':
+              operations.push({ operator: '$eq', props: { field: name, value: operators } })
+              break;
+            case 'object':
+              if (Array.isArray(operators)) {
+                operations.push({ operator: '$in', props: { field: name, value: operators }})
+              }
+              else {
+                // loop over every operation over the column
+                for (const operator in operators) {
+                  const value = operators[operator]
+                  // and add its name and its value as a prop to the operator
+                  operations.push({ operator, props: { field: name, value } })
+                }
+              }
+              break;
+            default:
+              throw new TypeNotSupportedError()
           }
+          
         }
         
       }
