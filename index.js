@@ -1,4 +1,3 @@
-import './src/_config.js'
 import app from './src/index.js'
 
 const PORT = process.env.APP_PORT
