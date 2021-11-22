@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { test } from 'mocha'
+import { InvalidTokenError } from '../packages/auth/src/errors.js'
 
 import useSesionEndpoint from '../src/session/_endpoint.js'
 
@@ -11,6 +12,7 @@ describe('the session endpoint', () => {
   // Data
   let admin, request
   let token, accessToken, refreshToken
+  let tokenPayload
 
   // Modules
   let auth, hash
@@ -23,13 +25,6 @@ describe('the session endpoint', () => {
   
   beforeEach(() => {
     // Data    
-    request = {
-      query: {
-        username: 'santi',
-        password: '123456'
-      }
-    }
-
     admin = {
       id: 1,
       username: 'santi',
@@ -39,6 +34,8 @@ describe('the session endpoint', () => {
     token = 'BASIC.TOKEN.EXAMPLE'
     accessToken = 'ACCESS.TOKEN.EXAMPLE'
     refreshToken = 'REFRESH.TOKEN.EXAMPLE'
+
+    tokenPayload = { id: 5, type: 'refresh' }
  
     // Modules
     auth = {
@@ -49,8 +46,7 @@ describe('the session endpoint', () => {
           default: return token
         }
       }),
-      generateAccessToken: mock(() => accessToken),
-      generateRefreshToken: mock(() => refreshToken),
+      decode: mock(() => tokenPayload)
     }
 
     hash = {
@@ -59,7 +55,7 @@ describe('the session endpoint', () => {
 
     // Table controllers
     sessions = {
-      findOne: mock(() => { return { ...admin } }),
+      findOne: mock(() => { return { fkAdmin: tokenPayload.id, token: refreshToken } }),
       removeMany: mock(),
       insertOne: mock(),
     }    
@@ -77,7 +73,18 @@ describe('the session endpoint', () => {
     })
   })
   
-  describe('then login is called', () => {
+  describe('when the login endpoint called', () => {
+
+    let request
+    
+    beforeEach(() => {
+      request = {
+        query: {
+          username: 'santi',
+          password: '123456'
+        }
+      }
+    })
     
     describe('and it recibes an username and password params', () => {
 
@@ -116,7 +123,7 @@ describe('the session endpoint', () => {
 
       it('saves the refresh token to the database', async () => {
         await session.login({ request })
-        expect(sessions)
+        expect(sessions.insertOne.mock.calls[0][0]).to.deep.equals({ fkAdmin: admin.id, token: refreshToken })
       })
 
       it('returns the admin data (without the password), the access token and the reresh token', async () => {
@@ -170,6 +177,95 @@ describe('the session endpoint', () => {
           await throwsAsync('MissingDataError', () => session.login({ request: request_empty }))
       })
 
+    })
+    
+  })
+
+  describe('when the refresh endpoint is called', () => {
+
+    let request
+
+    beforeEach(() => {
+      request = {
+        headers: {
+          authorization: `Bearer ${refreshToken}`
+        }
+      }
+    })
+    
+    it('decodes the token from the request header', async () => {
+      await session.refresh({ request })
+      expect(auth.decode.mock.calls[0][0]).to.equals(refreshToken)
+    })
+
+    it('brings the refresh token stored on the database', async () => {
+      await session.refresh({ request })
+      expect(sessions.findOne.mock.calls[0][0]).to.deep.equals({ fkAdmin: tokenPayload.id })
+    })
+
+    it('generates a new access token with a duration of 15 minutes', async () => {
+      await session.refresh({ request })
+      expect(auth.generate.mock.calls[0][0]).to.deep.equals({ id: tokenPayload.id, type: 'access' })
+      expect(auth.generate.mock.calls[0][1]).to.deep.equals({ expiration: 900 })
+    })
+
+    it('generates a new refresh token with a duration of one hour', async () => {
+      await session.refresh({ request })
+      expect(auth.generate.mock.calls[1][0]).to.deep.equals({ id: tokenPayload.id, type: 'refresh' })
+      expect(auth.generate.mock.calls[1][1]).to.deep.equals({ expiration: 3600 })
+    })
+    
+    it("deletes all sessions linked to the admin's id", async () => {
+      await session.refresh({ request })
+      expect(sessions.removeMany.mock.calls[0][0]).to.deep.equals({ fkAdmin: tokenPayload.id })
+    })
+
+    it('saves the new refresh token to the database', async () => {
+      await session.refresh({ request })
+      expect(sessions.insertOne.mock.calls[0][0]).to.deep.equals({ fkAdmin: tokenPayload.id, token: refreshToken })
+    })
+
+    it('returns the new tokens', async () => {
+      const result = await session.refresh({ request })
+      expect(result.success).to.equals(true)
+      expect(result.accessToken).to.equals(accessToken)
+      expect(result.refreshToken).to.equals(refreshToken)
+    })
+
+    describe("if the request header's token is not valid", () => {
+      
+      it('throws an InvalidTokenError', async () => {
+        auth.decode = mock(() => { throw new InvalidTokenError() })
+        await throwsAsync('InvalidTokenError', () => session.refresh({ request }))
+      })
+      
+    })
+
+    describe("if the token's type is not refresh", () => {
+      
+      it('throws an UnauthorizedError', async () => {
+        auth.decode.mock.returns = { id: 5, type: 'access' }
+        await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
+      })
+      
+    })
+
+    describe('if the database token is not found', () => {
+      
+      it('throws an UnauthorizedError', async () => {
+        sessions.findOne.mock.returns = null
+        await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
+      })
+      
+    })
+
+    describe('if the tokens are different to each other', () => {
+
+      it('throws an UnauthorizedError', async () => {
+        sessions.findOne.mock.returns = { fkAdmin: 5, token: 'OTRO.TOKEN.DISTINTO' }
+        await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
+      })
+      
     })
     
   })

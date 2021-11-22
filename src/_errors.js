@@ -28,3 +28,13 @@ export class InvalidPasswordError extends Error {
     }
   }
 }
+
+export class UnauthorizedError extends Error {
+  constructor() {
+    super(`No se pudo autenticar tu pedido`)
+    this.name = 'UnauthorizedError'
+    if(Error.captureStackTrace) {
+      Error.captureStackTrace(this, UnauthorizedError)
+    }
+  }
+}

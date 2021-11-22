@@ -1,4 +1,4 @@
-import { InvalidPasswordError, MissingDataError, InvalidUsernameError } from "../_errors.js"
+import { InvalidPasswordError, MissingDataError, InvalidUsernameError, UnauthorizedError } from "../_errors.js"
 
 export default ({ auth, hash, sessions, admins }) => ({
 
@@ -38,6 +38,37 @@ export default ({ auth, hash, sessions, admins }) => ({
     }
   },
 
+  async logout({ request }) {
 
+  },
+
+  async refresh({ request }) {
+    const authorization = request.headers.authorization
+    const headerToken = authorization.split(' ')[1]
+    
+    const payload = auth.decode(headerToken)
+
+    if(payload.type !== 'refresh') {
+      throw new UnauthorizedError()
+    }
+
+    const session = await sessions.findOne({ fkAdmin: payload.id })
+
+    if(!session || session.token !== headerToken) {
+      throw new UnauthorizedError()
+    }
+
+    const accessToken = auth.generate({ id: payload.id, type: 'access' }, { expiration: 900 })
+    const refreshToken = auth.generate({ id: payload.id, type: 'refresh' }, { expiration: 3600 })
+
+    await sessions.removeMany({ fkAdmin: payload.id })
+    await sessions.insertOne({ fkAdmin: payload.id, token: refreshToken })
+
+    return {
+      success: true,
+      accessToken,
+      refreshToken,
+    }
+  }
   
 })
