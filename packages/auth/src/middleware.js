@@ -1,6 +1,5 @@
 import { AuthenticationFailedError } from "../src/errors.js"
 
-
 export default ({ auth }) => (req, res, next) => {
   const authorization = req.headers.authorization
 
@@ -31,6 +30,6 @@ export default ({ auth }) => (req, res, next) => {
   
   req.auth = {}
   req.auth.payload = payload
-
+  
   next()
 }

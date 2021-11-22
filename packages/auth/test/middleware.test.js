@@ -24,7 +24,10 @@ describe("the admin({ auth })(req, res, next) middleware", () => {
         authorization: `bearer ${token}`
       }
     }
-    res = {}
+    res = {
+      status: mock(() => this).bind(res),
+      send: mock()
+    }
     next = mock()
     // Modules
     auth = {
