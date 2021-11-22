@@ -1,4 +1,3 @@
-DROP TABLE `casa_pignataro`.`admin_session`;
 CREATE TABLE `casa_pignataro`.`admin_session` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `fkAdmin` INT UNSIGNED NOT NULL,
