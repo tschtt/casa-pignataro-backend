@@ -1,6 +1,6 @@
-import { InvalidTokenError, MissingAuthKeyError } from "../src/errors.js";
+import { AuthenticationFailedError } from "../src/errors.js";
 import { expect } from "chai";
-import { mock } from "./helpers/mock.js"
+import mock from "./helpers/mock.js"
 
 import useAuth from "../src/auth.js"
 
@@ -24,14 +24,6 @@ describe("given the useAuth(dependencies, options) package", () => {
       { jwt }, 
       { key, expiration, algorithm }
     )
-  })
-
-  describe("and option.key is undefined", () => {
-    
-    it('throws an MissingAuthKeyError', () => {
-      expect(() => useAuth({ jwt })).to.throw(MissingAuthKeyError)
-    })
-    
   })
   
   describe("when the generate(payload, options) method is called", () => {
@@ -122,9 +114,10 @@ describe("given the useAuth(dependencies, options) package", () => {
 
     describe('and if the token is invalid', () => {
       
-      it('throws an InvalidTokenError', async () => {
+      it("throws an AuthenticationFailedError with a message like 'No se pudo autenticar su pedido: el token provisto no es valido'", async () => {
         jwt.verify = mock(() => { throw new Error('Token Invalido') })
-        expect(() => auth.decode(token)).to.throw(InvalidTokenError)
+        expect(() => auth.decode(token)).to.throw(AuthenticationFailedError)
+        expect(() => auth.decode(token)).to.throw('No se pudo autenticar su pedido: el token provisto no es valido')
       })
       
     })

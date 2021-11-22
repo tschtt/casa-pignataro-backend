@@ -1,9 +1,6 @@
-import { InvalidTokenError, MissingAuthKeyError } from "./errors.js"
+import { AuthenticationFailedError } from "./errors.js"
 
 export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = 'HS256' } = {}) {
-  if(!key) {
-    throw new MissingAuthKeyError()
-  }
   return {
 
     generate(payload = {}, options = {}) {
@@ -26,7 +23,7 @@ export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = '
       try {
         return jwt.verify(token, jwt_key, jwt_options)
       } catch {
-        throw new InvalidTokenError()
+        throw new AuthenticationFailedError('el token provisto no es valido')
       }
     }
     
