@@ -99,13 +99,13 @@ describe('the session endpoint', () => {
 
       it('generates an access token with a duration of 15 minutes', async () => {
         await session.login({ request })
-        expect(auth.generate.mock.calls[0][0]).to.deep.equals({ id: admin.id })
+        expect(auth.generate.mock.calls[0][0]).to.deep.equals({ id: admin.id, type: 'access' })
         expect(auth.generate.mock.calls[0][1]).to.deep.equals({ expiration: 900 })
       })
 
       it('generates a refresh token with a duration of one hour', async () => {        
         await session.login({ request })
-        expect(auth.generate.mock.calls[1][0]).to.deep.equals({ id: admin.id })
+        expect(auth.generate.mock.calls[1][0]).to.deep.equals({ id: admin.id, type: 'refresh' })
         expect(auth.generate.mock.calls[1][1]).to.deep.equals({ expiration: 3600 })
       })
 

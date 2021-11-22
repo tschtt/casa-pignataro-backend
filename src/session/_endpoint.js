@@ -2,7 +2,7 @@ import { InvalidPasswordError, MissingDataError, InvalidUsernameError } from "..
 
 export default ({ auth, hash, sessions, admins }) => ({
 
-  async login({ request }) {    
+  async login({ request }) { 
     const username = request.query.username
     const password = request.query.password
 
@@ -22,8 +22,8 @@ export default ({ auth, hash, sessions, admins }) => ({
       throw new InvalidPasswordError()
     }
     
-    const accessToken = auth.generate({ id: admin.id }, { expiration: 900 })
-    const refreshToken = auth.generate({ id: admin.id }, { expiration: 3600 })
+    const accessToken = auth.generate({ id: admin.id, type: 'access' }, { expiration: 900 })
+    const refreshToken = auth.generate({ id: admin.id, type: 'refresh' }, { expiration: 3600 })
 
     await sessions.removeMany({ fkAdmin: admin.id })
     await sessions.insertOne({ fkAdmin: admin.id, token: refreshToken })
@@ -37,5 +37,7 @@ export default ({ auth, hash, sessions, admins }) => ({
       admin,
     }
   },
+
+
   
 })
