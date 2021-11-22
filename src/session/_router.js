@@ -1,3 +1,4 @@
+import { middleware as admin } from '@packages/auth'
 import express from 'express'
 
 const handler = (endpoint) => async (req, res, next) => {
@@ -16,6 +17,8 @@ export default ({ endpoint }) => {
 
   router.post('/refresh', handler(endpoint.refresh))
   router.post('/', handler(endpoint.login))
+  
+  router.delete('/', admin, handler(endpoint.logout))
   
   return router
 }
