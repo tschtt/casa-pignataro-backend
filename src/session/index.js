@@ -3,10 +3,12 @@ import hash from '@packages/hash'
 
 import { controller as admins } from '../admins/index.js'
 
+import useTable from '@packages/table'
 import useEndpoint from './_endpoint.js'
 import useRouter from './_router.js'
 
-const endpoint = useEndpoint({ auth, hash, admins })
+const sessions = useTable('admin_session')
+const endpoint = useEndpoint({ auth, hash, admins, sessions })
 const router = useRouter({ endpoint })
 
 export default router
