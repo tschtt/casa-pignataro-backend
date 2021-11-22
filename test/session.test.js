@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { test } from 'mocha'
-import { InvalidTokenError } from '../packages/auth/src/errors.js'
+import { AuthenticationFailedError } from '../packages/auth/src/errors.js'
 
 import useSesionEndpoint from '../src/session/_endpoint.js'
 
@@ -188,8 +188,10 @@ describe('the session endpoint', () => {
     beforeEach(() => {
       request = {
         auth: {
-          id: 3,
-          type: 'access'
+          payload: {
+            id: 3,
+            type: 'access'
+          }
         }
       }
     })
@@ -260,9 +262,9 @@ describe('the session endpoint', () => {
 
     describe("if the request header's token is not valid", () => {
       
-      it('throws an InvalidTokenError', async () => {
-        auth.decode = mock(() => { throw new InvalidTokenError() })
-        await throwsAsync('InvalidTokenError', () => session.refresh({ request }))
+      it('throws an AuthenticationFailedError', async () => {
+        auth.decode = mock(() => { throw new AuthenticationFailedError() })
+        await throwsAsync('AuthenticationFailedError', () => session.refresh({ request }))
       })
       
     })

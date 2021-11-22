@@ -39,7 +39,7 @@ export default ({ auth, hash, sessions, admins }) => ({
   },
 
   async logout({ request }) {
-    const fkAdmin = request.auth.id
+    const fkAdmin = request.auth.payload.id
     await sessions.removeMany({ fkAdmin })
     return {
       success: true,
