@@ -24,4 +24,27 @@ app.get('/', (req, res, next) => {
   })
 })
 
+app.use((error, req, res, next) => {
+  switch (error.name) {
+    case 'AuthenticationFailedError':
+      res.status(401).send({ success: false, message: error.message })
+      break;
+    case 'MissingDataError':
+      res.status(400).send({ success: false, message: error.message })
+      break;
+    case 'InvalidUsernameError':
+      res.status(404).send({ success: false, message: error.message })
+      break;
+    case 'UnauthorizedError':
+    case 'InvalidTokenError':
+    case 'InvalidPasswordError':
+      res.status(401).send({ success: false, message: error.message })
+      break;
+    default:
+      console.error(error.stack)
+      res.status(500).send({ success: false, message: 'Error interno' })
+      break;
+  }
+})
+
 export default app
