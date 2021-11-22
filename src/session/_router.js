@@ -28,7 +28,7 @@ const handler = (endpoint) => async (req, res, next) => {
 export default ({ endpoint }) => {
   const router = express.Router()
 
-  router.get('/', handler(endpoint.login))
+  router.post('/', handler(endpoint.login))
   
   return router
 }
