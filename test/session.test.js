@@ -73,7 +73,7 @@ describe('the session endpoint', () => {
     })
   })
   
-  describe('when the login endpoint called', () => {
+  describe('when the login endpoint is called', () => {
 
     let request
     
@@ -177,6 +177,32 @@ describe('the session endpoint', () => {
           await throwsAsync('MissingDataError', () => session.login({ request: request_empty }))
       })
 
+    })
+    
+  })
+
+  describe('when the logout endpoint is called', () => {
+    
+    let request
+
+    beforeEach(() => {
+      request = {
+        auth: {
+          id: 3,
+          type: 'access'
+        }
+      }
+    })
+    
+    it('deletes all sessions linked to the logged admin', async () => {
+      await session.logout({ request })
+      expect(sessions.removeMany.mock.calls[0][0]).to.deep.equals({ fkAdmin: 3 })
+    })
+
+    it('returns a success message', async () => {
+      const result = await session.logout({ request })        
+      expect(result.success).to.equals(true)
+      expect(result.message).to.equals('Se cerró la sesión')
     })
     
   })

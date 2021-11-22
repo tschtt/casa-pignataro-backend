@@ -39,7 +39,12 @@ export default ({ auth, hash, sessions, admins }) => ({
   },
 
   async logout({ request }) {
-
+    const fkAdmin = request.auth.id
+    await sessions.removeMany({ fkAdmin })
+    return {
+      success: true,
+      message: 'Se cerró la sesión'
+    }
   },
 
   async refresh({ request }) {
