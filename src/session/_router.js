@@ -12,6 +12,8 @@ const handler = (endpoint) => async (req, res, next) => {
       case 'InvalidUsernameError':
         res.status(404).send({ success: false, message: error.message })
         break;
+      case 'UnauthorizedError':
+      case 'InvalidTokenError':
       case 'InvalidPasswordError':
         res.status(401).send({ success: false, message: error.message })
         break;
