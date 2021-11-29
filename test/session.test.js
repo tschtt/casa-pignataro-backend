@@ -79,7 +79,7 @@ describe('the session endpoint', () => {
     
     beforeEach(() => {
       request = {
-        query: {
+        body: {
           username: 'santi',
           password: '123456'
         }
@@ -100,7 +100,7 @@ describe('the session endpoint', () => {
 
       it("compares the passwords to see if they match", async () => {
         await session.login({ request })
-        expect(hash.check.mock.calls[0][0]).to.equals(request.query.password)
+        expect(hash.check.mock.calls[0][0]).to.equals(request.body.password)
         expect(hash.check.mock.calls[0][1]).to.equals(admin.password)
       })
 
@@ -161,15 +161,15 @@ describe('the session endpoint', () => {
       
       test('throws a MissingDataError ', async () => {
           const request_no_user = {
-            query: { password: '123456' }
+            body: { password: '123456' }
           }
 
           const request_no_password = {
-            query: { username: 'santi' }
+            body: { username: 'santi' }
           }
 
           const request_empty = {
-            query: {}
+            body: {}
           }
 
           await throwsAsync('MissingDataError', () => session.login({ request: request_no_user }))

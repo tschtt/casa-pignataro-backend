@@ -3,8 +3,8 @@ import { InvalidPasswordError, MissingDataError, InvalidUsernameError, Unauthori
 export default ({ auth, hash, sessions, admins }) => ({
 
   async login({ request }) { 
-    const username = request.query.username
-    const password = request.query.password
+    const username = request.body.username
+    const password = request.body.password
 
     if(!username || !password) {
       throw new MissingDataError()

@@ -18,7 +18,7 @@ export default ({ table }) => ({
 
     item = await table.findOne(query, options)
     
-    if(hidePassword) {
+    if(item && hidePassword) {
       delete item.password
     }
     

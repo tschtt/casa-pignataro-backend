@@ -3,6 +3,16 @@ import express from 'express'
 
 export default ({ controller }) => {
   const router = express.Router()
+
+  router.get('/:id', admin, async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id)
+      const item = await controller.findOne({ id })
+      res.send({ success: true, item })
+    } catch (error) {
+      next(error)
+    }
+  })
   
   router.get('/', admin, async (req, res, next) => {
     try {
