@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-export default async function throws_async(error_name, method) {
+export async function throwsAsync(error_name, method) {
   let error = null
   try {
     await method()

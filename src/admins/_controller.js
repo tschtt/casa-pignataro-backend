@@ -24,5 +24,15 @@ export default ({ table }) => ({
     
     return item
   },
-  
+
+  async upsertOne(item, options) {
+    const result = await table.upsertOne(item, options)
+    return result
+  },
+
+  async removeOne(query, options) {
+    const result = await table.removeOne(query, options)
+    return result
+  },
+
 })

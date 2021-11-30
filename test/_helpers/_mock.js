@@ -1,5 +1,5 @@
 
-export default function mock(fn = () => {}) {
+export function mock(fn = () => {}) {
   
   const mock = {
     calls: [],

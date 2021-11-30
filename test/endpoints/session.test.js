@@ -1,11 +1,10 @@
 import { expect } from 'chai'
 import { test } from 'mocha'
-import { AuthenticationFailedError } from '../packages/auth/src/errors.js'
+import { mock, throwsAsync } from '../_helpers/index.js'
 
-import useSesionEndpoint from '../src/session/_endpoint.js'
+import { AuthenticationFailedError } from '../../packages/auth/src/errors.js'
+import useSesionEndpoint from '../../src/session/_endpoint.js'
 
-import mock from './helpers/mock.js'
-import throwsAsync from './helpers/throws-async.js'
 
 describe('the session endpoint', () => {
   

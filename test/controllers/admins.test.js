@@ -1,10 +1,9 @@
 import { expect } from "chai";
+import { mock } from '../_helpers/index.js'
 
-import useAdmins from '../src/admins/_controller.js'
+import useAdmins from '../../src/admins/_controller.js'
 
-import mock from './helpers/mock.js'
-
-describe('the admins module', () => {
+describe('the admins controller', () => {
   
   let table
   let items
@@ -26,6 +25,10 @@ describe('the admins module', () => {
       findMany: mock(() => Promise.resolve(items.map(item => ({ ...item })))),
       // idem lo de arriba
       findOne: mock(() => Promise.resolve({ ...item })),
+      
+      upsertOne: mock(() => Promise.resolve(1)),
+
+      removeOne: mock(() => Promise.resolve(true))
     }
     
     admins = useAdmins({ table })
@@ -135,6 +138,55 @@ describe('the admins module', () => {
         
       })
       
+    })
+    
+  })
+
+  describe("when the upsertOne(item, options) method is called", () => {
+
+    it("calls table.upsertOne", async () => {
+      const options = { offset: 5 }
+      await admins.upsertOne(item, options)
+      expect(table.upsertOne.mock.calls[0][0]).to.deep.equals(item)
+      expect(table.upsertOne.mock.calls[0][1]).to.deep.equals(options)
+    })
+
+    it("returns its result", async () => {
+      let result
+      
+      table.upsertOne.mock.returns = true
+      result = await admins.upsertOne()
+      expect(result).to.equals(true)
+
+      table.upsertOne.mock.returns = false
+      result = await admins.upsertOne()
+      expect(result).to.equals(false)
+    })
+
+  })
+
+  describe("when the removeOne(query, options) method is called", () => {
+
+    it("calls table.removeOne", async () => {
+      const query = { id: 1, username: { $like: 'hola' }}
+      const options = { offset: 5 }
+
+      await admins.removeOne(query, options)
+      
+      expect(table.removeOne.mock.calls[0][0]).to.equals(query)
+      expect(table.removeOne.mock.calls[0][1]).to.equals(options)
+    })
+
+    it("returns its result", async () => {
+      let result
+      
+      table.removeOne.mock.returns = true
+      result = await admins.removeOne()
+      expect(result).to.equals(true)
+
+      table.removeOne.mock.returns = false
+      result = await admins.removeOne()
+      expect(result).to.equals(false)
     })
     
   })
