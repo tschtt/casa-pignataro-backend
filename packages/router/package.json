@@ -1,0 +1,17 @@
+{
+  "name": "@packages/router",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "main": "node -r dotenv/config index.js",
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3",
+    "dotenv": "^10.0.0"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
