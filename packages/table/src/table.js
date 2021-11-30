@@ -83,7 +83,6 @@ export default ({ connection, builder: build }) => (table) => ({
     return result.affectedRows
   },
 
-
   async updateOne(query = {}, data, options = {}) {
     const result = await this.query({
       $update: { table, set: data },
@@ -99,6 +98,16 @@ export default ({ connection, builder: build }) => (table) => ({
     })
 
     return !!result.affectedRows
+  },
+
+  async upsertOne({ id, ...data }, options = {}) {
+    if(id) {
+      const wasChanged = await this.updateOne({ id }, data, options)
+      if(wasChanged) {
+        return id
+      }
+    }
+    return await this.insertOne(data, options)    
   },
 
   async removeMany(query = {}, options = {}) {
