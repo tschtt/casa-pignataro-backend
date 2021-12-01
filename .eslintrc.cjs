@@ -30,5 +30,7 @@ module.exports = {
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
     'no-multiple-empty-lines': ['error', { max: 1 }],
     'import/extensions': ['error', 'always', { js: 'always' }],
+    'arrow-body-style': 'off',
+    'no-unused-vars': ['error', { 'args': 'none' }],
   },
 }
