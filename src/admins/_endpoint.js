@@ -26,7 +26,7 @@ function parseQuery({ only, orderBy, order, limit, offset, ...query }) {
 
 export default ({ controller }) => ({
 
-  async findMany({ request }) {
+  async findMany(request) {
     const { query, options } = parseQuery(request.query)
     const items = await controller.findMany(query, options)
 
@@ -36,7 +36,7 @@ export default ({ controller }) => ({
     }
   },
 
-  async findOne({ request }) {
+  async findOne(request) {
     const { query, options } = parseQuery(request.query)
 
     query.id = parseInt(request.params.id)
@@ -49,7 +49,7 @@ export default ({ controller }) => ({
     }
   },
 
-  async upsertOne({ request }) {
+  async upsertOne(request) {
     const data = request.body
 
     data.id = parseInt(request.params.id) || 0
@@ -66,7 +66,7 @@ export default ({ controller }) => ({
     }
   },
 
-  async removeOne({ request }) {
+  async removeOne(request) {
     const { query, options } = parseQuery(request.query)
 
     query.id = parseInt(request.params.id)

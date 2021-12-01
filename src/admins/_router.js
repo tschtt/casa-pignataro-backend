@@ -1,16 +1,14 @@
 import { middleware as admin } from '@packages/auth'
-import { express, handler } from '@packages/router'
+import { useRouter } from '@packages/router'
 
-export default ({ endpoint }) => {
-  const router = express.Router()
-
-  router.get('/:id', admin, handler(endpoint.findOne))
-  router.get('/', admin, handler(endpoint.findMany))
-
-  router.put('/:id', admin, handler(endpoint.upsertOne))
-  router.put('/', admin, handler(endpoint.upsertOne))
-
-  router.delete('/:id', admin, handler(endpoint.removeOne))
-
-  return router
-}
+export default ({ endpoint }) => useRouter({
+  '/:id': {
+    get:    [ admin, endpoint.findOne   ],
+    put:    [ admin, endpoint.upsertOne ],
+    delete: [ admin, endpoint.removeOne ],
+  },
+  '/': {
+    get: [ admin, endpoint.findMany  ],
+    put: [ admin, endpoint.upsertOne ],
+  },
+})

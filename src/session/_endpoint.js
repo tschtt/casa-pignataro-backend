@@ -2,7 +2,7 @@ import { InvalidPasswordError, MissingDataError, InvalidUsernameError, Unauthori
 
 export default ({ auth, hash, sessions, admins }) => ({
 
-  async login({ request }) {
+  async login(request) {
     const { username, password } = request.body
 
     if (!username || !password) {
@@ -37,7 +37,7 @@ export default ({ auth, hash, sessions, admins }) => ({
     }
   },
 
-  async logout({ request }) {
+  async logout(request) {
     const fkAdmin = request.auth.payload.id
     await sessions.removeMany({ fkAdmin })
     return {
@@ -46,7 +46,7 @@ export default ({ auth, hash, sessions, admins }) => ({
     }
   },
 
-  async refresh({ request }) {
+  async refresh(request) {
     const { authorization } = request.headers
 
     const headerToken = authorization.split(' ')[1]

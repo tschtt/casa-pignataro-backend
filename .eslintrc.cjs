@@ -32,5 +32,8 @@ module.exports = {
     'import/extensions': ['error', 'always', { js: 'always' }],
     'arrow-body-style': 'off',
     'no-unused-vars': ['error', { 'args': 'none' }],
+    'key-spacing': 'off',
+    'no-multi-spaces': 'off',
+    'array-bracket-spacing': 'off',
   },
 }
