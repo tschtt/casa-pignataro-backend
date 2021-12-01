@@ -25,9 +25,26 @@ export default ({ table }) => ({
     return item
   },
 
-  async upsertOne(item, options) {
-    const result = await table.upsertOne(item, options)
+  async insertOne(item, options) {
+    item.password = process.env.DEFAULT_PASSWORD
+    const result = await table.insertOne(item, options)
     return result
+  },
+
+  async updateOne(query, item, options) {
+    delete item.password
+    const result = await table.updateOne(query, item, options)
+    return result
+  },
+
+  async upsertOne({ id, ...item }, options) {
+    if(id) {
+      const wasChanged = await this.updateOne({ id }, item, options)
+      if(wasChanged) {
+        return id
+      }
+    }
+    return await this.insertOne(item, options)
   },
 
   async removeOne(query, options) {

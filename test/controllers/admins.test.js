@@ -25,7 +25,8 @@ describe('the admins controller', () => {
       findMany: mock(() => Promise.resolve(items.map(item => ({ ...item })))),
       // idem lo de arriba
       findOne: mock(() => Promise.resolve({ ...item })),
-      
+      insertOne: mock(() => Promise.resolve(5)),
+      updateOne: mock(() => Promise.resolve(3)),
       upsertOne: mock(() => Promise.resolve(1)),
 
       removeOne: mock(() => Promise.resolve(true))
@@ -142,25 +143,106 @@ describe('the admins controller', () => {
     
   })
 
-  describe("when the upsertOne(item, options) method is called", () => {
+  describe("when the insertOne(data, options) method is called", () => {
 
-    it("calls table.upsertOne", async () => {
-      const options = { offset: 5 }
-      await admins.upsertOne(item, options)
-      expect(table.upsertOne.mock.calls[0][0]).to.deep.equals(item)
-      expect(table.upsertOne.mock.calls[0][1]).to.deep.equals(options)
+    it("calls table.insertOne and passes it its data with a default password", async () => {
+      process.env.DEFAULT_PASSWORD = 'HOLA MUNDO'
+      await admins.insertOne({ id: 1, username: 'asd' })
+      expect(table.insertOne.mock.calls[0][0]).to.deep.equals({ id: 1, username: 'asd', password: 'HOLA MUNDO' })
     })
 
-    it("returns its result", async () => {
+    it("returns the inserted id", async () => {
+      table.insertOne.mock.returns = 10
+      const result = await admins.insertOne({ id: 1, username: 'asd' })
+      expect(result).to.deep.equals(10)
+    })
+    
+  })
+
+  describe("when the updateOne(query, data, options) method is called", () => {
+    
+    it("calls table.updateOne and passes it its query, data and options", async () => {
+      await admins.updateOne({ id: 1 }, { username: 'jorge' })
+      expect(table.updateOne.mock.calls[0][0]).to.deep.equals({ id: 1 })
+      expect(table.updateOne.mock.calls[0][1]).to.deep.equals({ username: 'jorge' })
+    })
+
+    it("returns true of false depending if the row was updated", async () => {
       let result
       
-      table.upsertOne.mock.returns = true
-      result = await admins.upsertOne()
+      table.updateOne.mock.returns = true
+      result = await admins.updateOne({ id: 1 }, { username: 'jorge' })
       expect(result).to.equals(true)
 
-      table.upsertOne.mock.returns = false
-      result = await admins.upsertOne()
+      table.updateOne.mock.returns = false
+      result = await admins.updateOne({ id: 1 }, { username: 'jorge' })
       expect(result).to.equals(false)
+    })
+    
+    describe("if the data to update contains a password", () => {
+
+      it("removes it", async () => {
+        await admins.updateOne({ id: 1 }, { password: 'asdasd' })
+        expect(table.updateOne.mock.calls[0][1]).to.deep.equals({})
+      })
+      
+    })
+  })
+
+  describe("when the upsertOne(item, options) method is called", () => {
+
+    describe("and data.id truthy", () => {
+
+      it("updates the first row that matches its id with the data provided", async () => {
+        await admins.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
+        expect(table.updateOne.mock.calls[0][0]).to.deep.equals({ id: 5 })
+        expect(table.updateOne.mock.calls[0][1]).to.deep.equals({ username: 'peasd', email: 'arebw@amwn.omc' })
+      })
+
+      describe("if a row was matched", () => {
+
+        it("returns its id", async () => {
+          table.updateOne.mock.returns = true
+          const result = await admins.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
+          expect(result).to.equals(5)
+        })
+        
+      })
+
+      describe("if no row was matched", () => {
+        
+        it("inserts the data to a new row with a default password", async () => {
+          process.env.DEFAULT_PASSWORD = '123'
+          table.updateOne.mock.returns = 0
+          await admins.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
+          expect(table.insertOne.mock.calls[0][0]).to.deep.equals({ username: 'peasd', email: 'arebw@amwn.omc', password: '123' })
+        })
+
+        it("returns its id", async () => {
+          table.updateOne.mock.returns = 0
+          table.insertOne.mock.returns = 3
+          const result = await admins.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
+          expect(result).to.equals(3)
+        })
+        
+      })
+      
+    })
+    
+    describe("and data.id is falsy", () => {
+      
+      it("inserts the data to a new row with a default password", async () => {
+        process.env.DEFAULT_PASSWORD = '123'
+        await admins.upsertOne({ id: 0, username: 'peasd', email: 'arebw@amwn.omc' })
+        expect(table.insertOne.mock.calls[0][0]).to.deep.equals({ username: 'peasd', email: 'arebw@amwn.omc', password: '123' })
+      })
+
+      it("returns its result", async () => {
+        table.insertOne.mock.returns = 3
+        const result = await admins.upsertOne({ id: 0, username: 'peasd', email: 'arebw@amwn.omc' })
+        expect(result).to.equals(3)
+      })
+      
     })
 
   })

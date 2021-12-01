@@ -7,8 +7,8 @@ export default ({ endpoint }) => {
   router.get('/:id', admin, handler(endpoint.findOne))
   router.get('/', admin, handler(endpoint.findMany))  
 
-  // router.put('/:id', admin, handler(endpoint.upsertOne))
-  // router.put('/', admin, handler(endpoint.upsertOne))
+  router.put('/:id', admin, handler(endpoint.upsertOne))
+  router.put('/', admin, handler(endpoint.upsertOne))
 
   router.delete('/:id', admin, handler(endpoint.removeOne))
   
