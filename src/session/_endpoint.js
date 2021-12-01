@@ -1,33 +1,32 @@
-import { InvalidPasswordError, MissingDataError, InvalidUsernameError, UnauthorizedError } from "../_errors.js"
+import { InvalidPasswordError, MissingDataError, InvalidUsernameError, UnauthorizedError } from '../_errors.js'
 
 export default ({ auth, hash, sessions, admins }) => ({
 
-  async login({ request }) { 
-    const username = request.body.username
-    const password = request.body.password
+  async login({ request }) {
+    const { username, password } = request.body
 
-    if(!username || !password) {
+    if (!username || !password) {
       throw new MissingDataError()
     }
 
     const admin = await admins.findOne({ username }, { hidePassword: false })
 
-    if(!admin) {
+    if (!admin) {
       throw new InvalidUsernameError()
     }
-    
+
     const match = await hash.check(password, admin.password)
-    
-    if(!match) {
+
+    if (!match) {
       throw new InvalidPasswordError()
     }
-    
+
     const accessToken = auth.generate({ id: admin.id, type: 'access' }, { expiration: 900 })
     const refreshToken = auth.generate({ id: admin.id, type: 'refresh' }, { expiration: 3600 })
 
     await sessions.removeMany({ fkAdmin: admin.id })
     await sessions.insertOne({ fkAdmin: admin.id, token: refreshToken })
-    
+
     delete admin.password
 
     return {
@@ -43,23 +42,24 @@ export default ({ auth, hash, sessions, admins }) => ({
     await sessions.removeMany({ fkAdmin })
     return {
       success: true,
-      message: 'Se cerró la sesión'
+      message: 'Se cerró la sesión',
     }
   },
 
   async refresh({ request }) {
-    const authorization = request.headers.authorization
+    const { authorization } = request.headers
+
     const headerToken = authorization.split(' ')[1]
-    
+
     const payload = auth.decode(headerToken)
 
-    if(payload.type !== 'refresh') {
+    if (payload.type !== 'refresh') {
       throw new UnauthorizedError()
     }
 
     const session = await sessions.findOne({ fkAdmin: payload.id })
 
-    if(!session || session.token !== headerToken) {
+    if (!session || session.token !== headerToken) {
       throw new UnauthorizedError()
     }
 
@@ -74,6 +74,6 @@ export default ({ auth, hash, sessions, admins }) => ({
       accessToken,
       refreshToken,
     }
-  }
-  
+  },
+
 })

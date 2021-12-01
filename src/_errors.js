@@ -1,9 +1,8 @@
-
 export class MissingDataError extends Error {
   constructor() {
-    super(`Faltan datos`)
+    super('Faltan datos')
     this.name = 'MissingDataError'
-    if(Error.captureStackTrace) {
+    if (Error.captureStackTrace) {
       Error.captureStackTrace(this, MissingDataError)
     }
   }
@@ -11,9 +10,9 @@ export class MissingDataError extends Error {
 
 export class InvalidUsernameError extends Error {
   constructor() {
-    super(`No se encontró el usuario`)
+    super('No se encontró el usuario')
     this.name = 'InvalidUsernameError'
-    if(Error.captureStackTrace) {
+    if (Error.captureStackTrace) {
       Error.captureStackTrace(this, InvalidUsernameError)
     }
   }
@@ -21,9 +20,9 @@ export class InvalidUsernameError extends Error {
 
 export class InvalidPasswordError extends Error {
   constructor() {
-    super(`Contraseña invalida`)
+    super('Contraseña invalida')
     this.name = 'InvalidPasswordError'
-    if(Error.captureStackTrace) {
+    if (Error.captureStackTrace) {
       Error.captureStackTrace(this, InvalidPasswordError)
     }
   }
@@ -31,9 +30,9 @@ export class InvalidPasswordError extends Error {
 
 export class UnauthorizedError extends Error {
   constructor() {
-    super(`No se pudo autenticar tu pedido`)
+    super('No se pudo autenticar tu pedido')
     this.name = 'UnauthorizedError'
-    if(Error.captureStackTrace) {
+    if (Error.captureStackTrace) {
       Error.captureStackTrace(this, UnauthorizedError)
     }
   }

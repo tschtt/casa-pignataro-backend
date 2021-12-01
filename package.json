@@ -7,6 +7,7 @@
   "scripts": {
     "file": "node -r dotenv/config --",
     "start": "nodemon -r dotenv/config index.js",
+    "lint": "eslint --ext \".js\" --ignore-path .gitignore .",
     "test:app": "mocha ./test/*/*",
     "test": "mocha"
   },
@@ -24,6 +25,9 @@
   },
   "devDependencies": {
     "chai": "^4.3.4",
+    "eslint": "^8.3.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3",
     "mocha": "^9.1.3",
     "nodemon": "^2.0.15"
   }

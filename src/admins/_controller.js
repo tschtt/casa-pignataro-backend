@@ -3,25 +3,23 @@ export default ({ table }) => ({
 
   async findMany(query, { hidePassword = true, ...options } = {}) {
     let items
-    
+
     items = await table.findMany(query, options)
 
-    if(hidePassword) {
-      items = items.map(item => { delete item.password; return item })      
+    if (hidePassword) {
+      items = items.map((item) => { delete item.password; return item })
     }
-    
+
     return items
   },
 
   async findOne(query, { hidePassword = true, ...options } = {}) {
-    let item
+    const item = await table.findOne(query, options)
 
-    item = await table.findOne(query, options)
-    
-    if(item && hidePassword) {
+    if (item && hidePassword) {
       delete item.password
     }
-    
+
     return item
   },
 
@@ -38,13 +36,13 @@ export default ({ table }) => ({
   },
 
   async upsertOne({ id, ...item }, options) {
-    if(id) {
+    if (id) {
       const wasChanged = await this.updateOne({ id }, item, options)
-      if(wasChanged) {
+      if (wasChanged) {
         return id
       }
     }
-    return await this.insertOne(item, options)
+    return this.insertOne(item, options)
   },
 
   async removeOne(query, options) {

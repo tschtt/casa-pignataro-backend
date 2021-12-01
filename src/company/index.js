@@ -6,10 +6,10 @@ const router = express.Router()
 
 router.use('/payment-methods', paymentMethods)
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
   res.send({
     success: false,
-    message: 'Not implemented'
+    message: 'Not implemented',
   })
 })
 

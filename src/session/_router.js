@@ -4,7 +4,7 @@ import express from 'express'
 const handler = (endpoint) => async (req, res, next) => {
   try {
     const result = await endpoint({ request: req, response: res, next })
-    if(result) {
+    if (result) {
       res.send(result)
     }
   } catch (error) {
@@ -17,8 +17,8 @@ export default ({ endpoint }) => {
 
   router.post('/refresh', handler(endpoint.refresh))
   router.post('/', handler(endpoint.login))
-  
+
   router.delete('/', admin, handler(endpoint.logout))
-  
+
   return router
 }

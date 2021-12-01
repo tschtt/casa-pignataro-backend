@@ -1,27 +1,26 @@
 
 function parseQuery({ only, orderBy, order, limit, offset, ...query }) {
-  
-  if(limit) {
+  if (limit) {
     limit = parseInt(limit)
   }
-  
-  if(offset) {
+
+  if (offset) {
     offset = parseInt(offset)
   }
-  
-  if(only) {
+
+  if (only) {
     only = only.replace(/\s/g, '').split(',')
   }
 
-  return { 
-    query, 
+  return {
+    query,
     options: {
       only,
       orderBy,
       order,
       limit,
       offset,
-    }
+    },
   }
 }
 
@@ -31,19 +30,19 @@ export default ({ controller }) => ({
     const { query, options } = parseQuery(request.query)
     const items = await controller.findMany(query, options)
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       items,
     }
   },
 
   async findOne({ request }) {
     const { query, options } = parseQuery(request.query)
-    
+
     query.id = parseInt(request.params.id)
-    
+
     const item = await controller.findOne(query, options)
-    
+
     return {
       success: true,
       item,
@@ -52,11 +51,11 @@ export default ({ controller }) => ({
 
   async upsertOne({ request }) {
     const data = request.body
-    
+
     data.id = parseInt(request.params.id) || 0
 
     delete data.password
-    
+
     const id = await controller.upsertOne(data)
 
     const item = await controller.findOne({ id })
@@ -76,8 +75,8 @@ export default ({ controller }) => ({
 
     return {
       success: true,
-      removed
+      removed,
     }
   },
-  
+
 })

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 
 const HOST = process.env.DATABASE_HOST
 const USER = process.env.DATABASE_USER
@@ -11,7 +12,7 @@ export default async ({ mysql }) => {
     user: USER,
     password: PASSWORD,
     database: NAME,
-    port: PORT
+    port: PORT,
   })
 
   console.log('Connected to the database')

@@ -1,6 +1,5 @@
 
 export function mock(fn = () => {}) {
-  
   const mock = {
     calls: [],
     returns: undefined,
@@ -10,12 +9,11 @@ export function mock(fn = () => {}) {
     mock.calls.push(args)
     const result = fn(...args)
 
-    if(mock.returns === undefined)
-      return result
+    if (mock.returns === undefined) { return result }
     return mock.returns
   }
 
   result.mock = mock
-  
+
   return result
 }

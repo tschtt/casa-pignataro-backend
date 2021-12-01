@@ -1,33 +1,32 @@
+import { describe, it, beforeEach, test } from 'mocha'
 import { expect } from 'chai'
-import { test } from 'mocha'
+
+import { AuthenticationFailedError } from '@packages/auth/src/errors.js'
 import { mock, throwsAsync } from '../_helpers/index.js'
 
-import { AuthenticationFailedError } from '../../packages/auth/src/errors.js'
 import useSesionEndpoint from '../../src/session/_endpoint.js'
 
-
 describe('the session endpoint', () => {
-  
   // Data
-  let admin, request
+  let admin
   let token, accessToken, refreshToken
   let tokenPayload
 
   // Modules
   let auth, hash
-  
+
   // Table controllers
   let sessions, admins
 
   // The session endpoint
   let session
-  
+
   beforeEach(() => {
-    // Data    
+    // Data
     admin = {
       id: 1,
       username: 'santi',
-      password: '123456'
+      password: '123456',
     }
 
     token = 'BASIC.TOKEN.EXAMPLE'
@@ -35,7 +34,7 @@ describe('the session endpoint', () => {
     refreshToken = 'REFRESH.TOKEN.EXAMPLE'
 
     tokenPayload = { id: 5, type: 'refresh' }
- 
+
     // Modules
     auth = {
       generate: mock((payload, options) => {
@@ -45,51 +44,49 @@ describe('the session endpoint', () => {
           default: return token
         }
       }),
-      decode: mock(() => tokenPayload)
+      decode: mock(() => tokenPayload),
     }
 
     hash = {
-      check: mock(() => true)
+      check: mock(() => true),
     }
 
     // Table controllers
     sessions = {
-      findOne: mock(() => { return { fkAdmin: tokenPayload.id, token: refreshToken } }),
+      findOne: mock(() => ({ fkAdmin: tokenPayload.id, token: refreshToken })),
       removeMany: mock(),
       insertOne: mock(),
-    }    
+    }
 
     admins = {
-      findOne: mock(() => { return { ...admin } })
+      findOne: mock(() => ({ ...admin })),
     }
-    
+
     // The session endpoint
-    session = useSesionEndpoint({ 
-      auth, 
-      hash, 
-      admins, 
-      sessions 
+    session = useSesionEndpoint({
+      auth,
+      hash,
+      admins,
+      sessions,
     })
   })
-  
-  describe('when the login endpoint is called', () => {
 
+  describe('when the login endpoint is called', () => {
     let request
-    
+
     beforeEach(() => {
       request = {
         body: {
           username: 'santi',
-          password: '123456'
-        }
+          password: '123456',
+        },
       }
     })
-    
-    describe('and it recibes an username and password params', () => {
 
+    describe('and it recibes an username and password params', () => {
       it('finds an admin that matches the username passed', async () => {
         await session.login({ request })
-        expect(admins.findOne.mock.calls[0][0]).to.deep.equal({ username: 'santi' })        
+        expect(admins.findOne.mock.calls[0][0]).to.deep.equal({ username: 'santi' })
       })
 
       it('brings it with its password', async () => {
@@ -97,7 +94,7 @@ describe('the session endpoint', () => {
         expect(admins.findOne.mock.calls[0][1]).to.deep.equal({ hidePassword: false })
       })
 
-      it("compares the passwords to see if they match", async () => {
+      it('compares the passwords to see if they match', async () => {
         await session.login({ request })
         expect(hash.check.mock.calls[0][0]).to.equals(request.body.password)
         expect(hash.check.mock.calls[0][1]).to.equals(admin.password)
@@ -109,7 +106,7 @@ describe('the session endpoint', () => {
         expect(auth.generate.mock.calls[0][1]).to.deep.equals({ expiration: 900 })
       })
 
-      it('generates a refresh token with a duration of one hour', async () => {        
+      it('generates a refresh token with a duration of one hour', async () => {
         await session.login({ request })
         expect(auth.generate.mock.calls[1][0]).to.deep.equals({ id: admin.id, type: 'refresh' })
         expect(auth.generate.mock.calls[1][1]).to.deep.equals({ expiration: 3600 })
@@ -126,10 +123,10 @@ describe('the session endpoint', () => {
       })
 
       it('returns the admin data (without the password), the access token and the reresh token', async () => {
-        const result = await session.login({ request })        
+        const result = await session.login({ request })
 
         delete admin.password
-        
+
         expect(result.success).to.equals(true)
         expect(result.admin).to.deep.equals(admin)
         expect(result.accessToken).to.equals(accessToken)
@@ -137,51 +134,42 @@ describe('the session endpoint', () => {
       })
 
       describe('if the admin is not found', () => {
-        
         test('throws an InvalidUsernameError', async () => {
           admins.findOne.mock.returns = null
           await throwsAsync('InvalidUsernameError', () => session.login({ request }))
         })
-
       })
 
       describe('if the contraseñas do not match', () => {
-        
         test('throws an InvalidPasswordError', async () => {
           hash.check.mock.returns = false
           await throwsAsync('InvalidPasswordError', () => session.login({ request }))
         })
-        
       })
-      
     })
-    
+
     describe('if the username or password params are undefined', () => {
-      
       test('throws a MissingDataError ', async () => {
-          const request_no_user = {
-            body: { password: '123456' }
-          }
+        const requestNoUser = {
+          body: { password: '123456' },
+        }
 
-          const request_no_password = {
-            body: { username: 'santi' }
-          }
+        const requestNoPassword = {
+          body: { username: 'santi' },
+        }
 
-          const request_empty = {
-            body: {}
-          }
+        const requestEmpty = {
+          body: {},
+        }
 
-          await throwsAsync('MissingDataError', () => session.login({ request: request_no_user }))
-          await throwsAsync('MissingDataError', () => session.login({ request: request_no_password }))
-          await throwsAsync('MissingDataError', () => session.login({ request: request_empty }))
+        await throwsAsync('MissingDataError', () => session.login({ request: requestNoUser }))
+        await throwsAsync('MissingDataError', () => session.login({ request: requestNoPassword }))
+        await throwsAsync('MissingDataError', () => session.login({ request: requestEmpty }))
       })
-
     })
-    
   })
 
   describe('when the logout endpoint is called', () => {
-    
     let request
 
     beforeEach(() => {
@@ -189,37 +177,35 @@ describe('the session endpoint', () => {
         auth: {
           payload: {
             id: 3,
-            type: 'access'
-          }
-        }
+            type: 'access',
+          },
+        },
       }
     })
-    
+
     it('deletes all sessions linked to the logged admin', async () => {
       await session.logout({ request })
       expect(sessions.removeMany.mock.calls[0][0]).to.deep.equals({ fkAdmin: 3 })
     })
 
     it('returns a success message', async () => {
-      const result = await session.logout({ request })        
+      const result = await session.logout({ request })
       expect(result.success).to.equals(true)
       expect(result.message).to.equals('Se cerró la sesión')
     })
-    
   })
 
   describe('when the refresh endpoint is called', () => {
-
     let request
 
     beforeEach(() => {
       request = {
         headers: {
-          authorization: `Bearer ${refreshToken}`
-        }
+          authorization: `Bearer ${refreshToken}`,
+        },
       }
     })
-    
+
     it('decodes the token from the request header', async () => {
       await session.refresh({ request })
       expect(auth.decode.mock.calls[0][0]).to.equals(refreshToken)
@@ -241,7 +227,7 @@ describe('the session endpoint', () => {
       expect(auth.generate.mock.calls[1][0]).to.deep.equals({ id: tokenPayload.id, type: 'refresh' })
       expect(auth.generate.mock.calls[1][1]).to.deep.equals({ expiration: 3600 })
     })
-    
+
     it("deletes all sessions linked to the admin's id", async () => {
       await session.refresh({ request })
       expect(sessions.removeMany.mock.calls[0][0]).to.deep.equals({ fkAdmin: tokenPayload.id })
@@ -260,41 +246,31 @@ describe('the session endpoint', () => {
     })
 
     describe("if the request header's token is not valid", () => {
-      
       it('throws an AuthenticationFailedError', async () => {
         auth.decode = mock(() => { throw new AuthenticationFailedError() })
         await throwsAsync('AuthenticationFailedError', () => session.refresh({ request }))
       })
-      
     })
 
     describe("if the token's type is not refresh", () => {
-      
       it('throws an UnauthorizedError', async () => {
         auth.decode.mock.returns = { id: 5, type: 'access' }
         await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
       })
-      
     })
 
     describe('if the database token is not found', () => {
-      
       it('throws an UnauthorizedError', async () => {
         sessions.findOne.mock.returns = null
         await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
       })
-      
     })
 
     describe('if the tokens are different to each other', () => {
-
       it('throws an UnauthorizedError', async () => {
         sessions.findOne.mock.returns = { fkAdmin: 5, token: 'OTRO.TOKEN.DISTINTO' }
         await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
       })
-      
     })
-    
   })
-  
 })

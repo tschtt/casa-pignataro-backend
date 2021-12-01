@@ -1,26 +1,26 @@
 
 export default ({ connection, builder: build }) => (table) => ({
-  
+
   async query(query = {}) {
     const sql = build(query)
     const result = await connection.query(sql)
     return result[0]
   },
-  
+
   async findMany(query = {}, options = {}) {
     const result = await this.query({
-      $select: { 
-        table, 
-        only: options.only 
+      $select: {
+        table,
+        only: options.only,
       },
       $where: query,
-      $order: { 
-        by: options.orderBy, 
-        sort: options.sort, 
+      $order: {
+        by: options.orderBy,
+        sort: options.sort,
       },
-      $limit: { 
-        amount: options.limit, 
-        offset: options.offset 
+      $limit: {
+        amount: options.limit,
+        offset: options.offset,
       },
     })
 
@@ -29,25 +29,25 @@ export default ({ connection, builder: build }) => (table) => ({
 
   async findOne(query = {}, options = {}) {
     const result = await this.query({
-      $select: { 
-        table, 
-        only: options.only 
+      $select: {
+        table,
+        only: options.only,
       },
       $where: query,
-      $order: { 
-        by: options.orderBy, 
-        sort: options.sort, 
+      $order: {
+        by: options.orderBy,
+        sort: options.sort,
       },
-      $limit: { 
-        amount: 1, 
-        offset: options.offset 
+      $limit: {
+        amount: 1,
+        offset: options.offset,
       },
     })
 
     return result[0]
   },
 
-  async insertMany(rows = [], options) {
+  async insertMany(rows = []) {
     const result = await this.query({
       $insert: { table, values: rows },
     })
@@ -55,7 +55,7 @@ export default ({ connection, builder: build }) => (table) => ({
     return result.insertId
   },
 
-  async insertOne(row = [], options) {
+  async insertOne(row = []) {
     const result = await this.query({
       $insert: { table, value: row },
     })
@@ -63,37 +63,37 @@ export default ({ connection, builder: build }) => (table) => ({
     return result.insertId
   },
 
-  async updateMany(query = {}, data, options = {}) {
+  async updateMany(query, data, options = {}) {
     const result = await this.query({
-      $update: { 
-        table, 
-        set: data 
+      $update: {
+        table,
+        set: data,
       },
       $where: query,
-      $order: { 
-        by: options.orderBy, 
-        sort: options.sort, 
+      $order: {
+        by: options.orderBy,
+        sort: options.sort,
       },
-      $limit: { 
-        amount: options.limit, 
-        offset: options.offset 
+      $limit: {
+        amount: options.limit,
+        offset: options.offset,
       },
     })
 
     return result.affectedRows
   },
 
-  async updateOne(query = {}, data, options = {}) {
+  async updateOne(query, data, options = {}) {
     const result = await this.query({
       $update: { table, set: data },
       $where: query,
-      $order: { 
-        by: options.orderBy, 
-        sort: options.sort, 
+      $order: {
+        by: options.orderBy,
+        sort: options.sort,
       },
-      $limit: { 
-        amount: 1, 
-        offset: options.offset 
+      $limit: {
+        amount: 1,
+        offset: options.offset,
       },
     })
 
@@ -101,26 +101,26 @@ export default ({ connection, builder: build }) => (table) => ({
   },
 
   async upsertOne({ id, ...data }, options = {}) {
-    if(id) {
+    if (id) {
       const wasChanged = await this.updateOne({ id }, data, options)
-      if(wasChanged) {
+      if (wasChanged) {
         return id
       }
     }
-    return await this.insertOne(data, options)    
+    return this.insertOne(data, options)
   },
 
   async removeMany(query = {}, options = {}) {
     const result = await this.query({
       $delete: { table },
       $where: query,
-      $order: { 
-        by: options.orderBy, 
-        sort: options.sort, 
+      $order: {
+        by: options.orderBy,
+        sort: options.sort,
       },
-      $limit: { 
-        amount: options.limit, 
-        offset: options.offset 
+      $limit: {
+        amount: options.limit,
+        offset: options.offset,
       },
     })
 
@@ -131,17 +131,17 @@ export default ({ connection, builder: build }) => (table) => ({
     const result = await this.query({
       $delete: { table },
       $where: query,
-      $order: { 
-        by: options.orderBy, 
-        sort: options.sort, 
+      $order: {
+        by: options.orderBy,
+        sort: options.sort,
       },
-      $limit: { 
-        amount: 1, 
-        offset: options.offset 
+      $limit: {
+        amount: 1,
+        offset: options.offset,
       },
     })
 
     return !!result.affectedRows
-  }
-  
+  },
+
 })

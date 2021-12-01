@@ -1,6 +1,6 @@
-import { expect } from "chai"
+import { expect } from 'chai'
 
-export async function throwsAsync(error_name, method) {
+export async function throwsAsync(errorName, method) {
   let error = null
   try {
     await method()
@@ -8,8 +8,8 @@ export async function throwsAsync(error_name, method) {
   catch (err) {
     error = err
   }
-  if(!error) {
+  if (!error) {
     throw new Error('No tiro error')
   }
-  expect(error.name).to.equals(error_name)
+  expect(error.name).to.equals(errorName)
 }

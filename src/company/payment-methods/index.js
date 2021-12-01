@@ -5,7 +5,7 @@ const router = express.Router()
 router.get('/', (req, res) => {
   res.send({
     success: false,
-    message: 'Not implemented'
+    message: 'Not implemented',
   })
 })
 
