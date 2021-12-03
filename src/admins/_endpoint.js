@@ -30,10 +30,7 @@ export default ({ controller }) => ({
     const { query, options } = parseQuery(request.query)
     const items = await controller.findMany(query, options)
 
-    return {
-      success: true,
-      items,
-    }
+    return items
   },
 
   async findOne(request) {
@@ -43,10 +40,7 @@ export default ({ controller }) => ({
 
     const item = await controller.findOne(query, options)
 
-    return {
-      success: true,
-      item,
-    }
+    return item
   },
 
   async upsertOne(request) {
@@ -60,10 +54,7 @@ export default ({ controller }) => ({
 
     const item = await controller.findOne({ id })
 
-    return {
-      success: true,
-      item,
-    }
+    return item
   },
 
   async removeOne(request) {
@@ -73,10 +64,7 @@ export default ({ controller }) => ({
 
     const removed = await controller.removeOne(query, options)
 
-    return {
-      success: true,
-      removed,
-    }
+    return removed
   },
 
 })
