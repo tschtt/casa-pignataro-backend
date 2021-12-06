@@ -63,6 +63,8 @@ export default ({ auth, hash, sessions, admins }) => ({
       throw new UnauthorizedError()
     }
 
+    const admin = await admins.findOne({ id: payload.id })
+
     const accessToken = auth.generate({ id: payload.id, type: 'access' }, { expiration: 900 })
     const refreshToken = auth.generate({ id: payload.id, type: 'refresh' }, { expiration: 3600 })
 
@@ -73,6 +75,7 @@ export default ({ auth, hash, sessions, admins }) => ({
       success: true,
       accessToken,
       refreshToken,
+      admin,
     }
   },
 
