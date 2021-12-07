@@ -1,0 +1,1 @@
+ALTER TABLE `admin` ADD `passwordReset` BIT NOT NULL DEFAULT 1;
