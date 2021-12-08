@@ -1,1 +1,1 @@
-ALTER TABLE `admin` ADD `passwordReset` BIT NOT NULL DEFAULT 1;
+ALTER TABLE `admin` ADD `passwordReset` TINYINT(1) NOT NULL DEFAULT 1;
