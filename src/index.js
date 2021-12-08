@@ -17,18 +17,10 @@ export default useApp({
 }, {
   errorHandler: (error, req, res, next) => {
     switch (error.name) {
-      case 'AuthenticationFailedError':
-        res.status(401).send({ success: false, message: error.message })
-        break
-      case 'MissingDataError':
+      case 'BadRequestError':
         res.status(400).send({ success: false, message: error.message })
         break
-      case 'InvalidUsernameError':
-        res.status(404).send({ success: false, message: error.message })
-        break
       case 'UnauthorizedError':
-      case 'InvalidTokenError':
-      case 'InvalidPasswordError':
         res.status(401).send({ success: false, message: error.message })
         break
       default:

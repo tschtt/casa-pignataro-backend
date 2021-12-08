@@ -1,39 +1,47 @@
-import { InvalidPasswordError, MissingDataError, InvalidUsernameError, UnauthorizedError } from '../_errors.js'
+import { BadRequestError, UnauthorizedError } from '../_errors.js'
 
 export default ({ auth, hash, sessions, admins }) => ({
 
   async login(request) {
     const { username, password } = request.body
 
-    if (!username || !password) {
-      throw new MissingDataError()
+    if (!username) {
+      throw new BadRequestError('Falta el nombre de usuario')
     }
 
-    const admin = await admins.findOne({ username }, { hidePassword: false })
-
-    if (!admin) {
-      throw new InvalidUsernameError()
+    if (!password) {
+      throw new BadRequestError('Falta la contraseña')
     }
 
-    const match = await hash.check(password, admin.password)
+    const user = await admins.findOne({ username })
+
+    if (!user) {
+      throw new BadRequestError('No se encontró el usuario')
+    }
+
+    if (!user.active) {
+      throw new BadRequestError('El usuario se encuentra inactivo')
+    }
+
+    const match = await hash.check(password, user.password)
 
     if (!match) {
-      throw new InvalidPasswordError()
+      throw new BadRequestError('La contraseña es incorrecta')
     }
 
-    const accessToken = auth.generate({ id: admin.id, type: 'access' }, { expiration: 900 })
-    const refreshToken = auth.generate({ id: admin.id, type: 'refresh' }, { expiration: 3600 })
+    const accessToken = auth.generate({ id: user.id, type: 'access' }, { expiration: 900 })
+    const refreshToken = auth.generate({ id: user.id, type: 'refresh' }, { expiration: 3600 })
 
-    await sessions.removeMany({ fkAdmin: admin.id })
-    await sessions.insertOne({ fkAdmin: admin.id, token: refreshToken })
+    await sessions.removeMany({ fkAdmin: user.id })
+    await sessions.insertOne({ fkAdmin: user.id, token: refreshToken })
 
-    delete admin.password
+    delete user.password
 
     return {
       success: true,
       accessToken,
       refreshToken,
-      admin,
+      user,
     }
   },
 
@@ -63,7 +71,7 @@ export default ({ auth, hash, sessions, admins }) => ({
       throw new UnauthorizedError()
     }
 
-    const admin = await admins.findOne({ id: payload.id })
+    const user = await admins.findOne({ id: payload.id })
 
     const accessToken = auth.generate({ id: payload.id, type: 'access' }, { expiration: 900 })
     const refreshToken = auth.generate({ id: payload.id, type: 'refresh' }, { expiration: 3600 })
@@ -71,11 +79,13 @@ export default ({ auth, hash, sessions, admins }) => ({
     await sessions.removeMany({ fkAdmin: payload.id })
     await sessions.insertOne({ fkAdmin: payload.id, token: refreshToken })
 
+    delete user.password
+
     return {
       success: true,
       accessToken,
       refreshToken,
-      admin,
+      user,
     }
   },
 
