@@ -1,0 +1,9 @@
+CREATE TABLE `casa_pignataro`.`contact` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `active` TINYINT(1) NOT NULL DEFAULT 1,
+  `name` VARCHAR(50) NOT NULL,
+  `value` VARCHAR(255) NOT NULL,
+  `icon`  VARCHAR(50) NOT NULL,
+  `order` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`)
+)
