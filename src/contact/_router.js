@@ -3,6 +3,7 @@ import { middleware as admin } from '@packages/auth'
 
 export default ({ endpoint }) => useRouter({
   '/:id': {
+    get: endpoint.findOne,
     patch: [admin, endpoint.updateOne],
   },
   '/': {

@@ -1,8 +1,12 @@
 
 export default ({ table }) => ({
 
-  findMany() {
-    return table.findMany()
+  findMany(request) {
+    return table.findMany(request.query)
+  },
+
+  findOne(request) {
+    return table.findOne({ id: parseInt(request.params.id) })
   },
 
   async insertOne(request) {
