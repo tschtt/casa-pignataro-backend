@@ -1,0 +1,1 @@
+DROP TABLE `casa_pignataro`.`company`;

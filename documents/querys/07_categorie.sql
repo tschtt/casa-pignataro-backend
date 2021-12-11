@@ -1,0 +1,7 @@
+CREATE TABLE `casa_pignataro`.`categorie` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `active` TINYINT(1) NOT NULL DEFAULT 1,
+  `name` VARCHAR(50) NOT NULL,
+  `fkCategorie` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+)

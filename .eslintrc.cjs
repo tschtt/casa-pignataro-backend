@@ -35,5 +35,6 @@ module.exports = {
     'key-spacing': 'off',
     'no-multi-spaces': 'off',
     'array-bracket-spacing': 'off',
+    'prefer-const': 'off',
   },
 }
