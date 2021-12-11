@@ -1,12 +1,14 @@
 import { useApp } from '@packages/router'
 
 import admins from './admins/index.js'
+import articles from './articles/index.js'
 import categories from './categories/index.js'
 import contact from './contact/index.js'
 import session from './session/index.js'
 
 export default useApp({
   '/admins': admins,
+  '/articles': articles,
   '/categories': categories,
   '/contact': contact,
   '/session': session,
