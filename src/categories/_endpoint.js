@@ -1,19 +1,48 @@
+/* eslint-disable default-param-last */
 
 export default ({ table }) => ({
 
-  async findMany() {
+  async findMany(request) {
     const items = await table.findMany()
 
-    const parse = (items = [], fkCategorie = 0) => {
+    if (request.query.flat !== undefined) {
+      const format = (items = [], fkCategorie = 0, path) => {
+        const levelItems = items.filter((item) => item.fkCategorie === fkCategorie)
+        levelItems.forEach((item) => {
+          // const index = items.findIndex((i) => i.id === item.id)
+
+          item.full = path
+            ? [path, item.name].join(' / ')
+            : item.name
+
+          item.categories = format(items, item.id, item.full)
+
+          delete item.fkCategorie
+
+          // items[index] = { ...item }
+        })
+      }
+      format(items)
+
+      return items
+    }
+
+    const format = (items = [], fkCategorie = 0, path) => {
       const levelItems = items.filter((item) => item.fkCategorie === fkCategorie)
       return levelItems.map((item) => {
-        item.categories = parse(items, item.id)
+        item.full = path
+          ? [path, item.name].join(' / ')
+          : item.name
+
+        item.categories = format(items, item.id, item.full)
+
         delete item.fkCategorie
+
         return item
       })
     }
 
-    return parse(items)
+    return format(items)
   },
 
   async findOne(request) {
