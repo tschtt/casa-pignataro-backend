@@ -9,12 +9,12 @@ export class BadRequestError extends Error {
   }
 }
 
-export class UnauthorizedError extends Error {
+export class AuthorizationError extends Error {
   constructor(message) {
     super(message)
-    this.name = 'UnauthorizedError'
+    this.name = 'AuthorizationError'
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, UnauthorizedError)
+      Error.captureStackTrace(this, AuthorizationError)
     }
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestError, UnauthorizedError } from '../_errors.js'
+import { BadRequestError, AuthorizationError } from '../_errors.js'
 
 export default ({ auth, hash, sessions, admins }) => ({
 
@@ -62,13 +62,13 @@ export default ({ auth, hash, sessions, admins }) => ({
     const payload = auth.decode(headerToken)
 
     if (payload.type !== 'refresh') {
-      throw new UnauthorizedError()
+      throw new AuthorizationError()
     }
 
     const session = await sessions.findOne({ fkAdmin: payload.id })
 
     if (!session || session.token !== headerToken) {
-      throw new UnauthorizedError()
+      throw new AuthorizationError()
     }
 
     const user = await admins.findOne({ id: payload.id })

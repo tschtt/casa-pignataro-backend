@@ -1,4 +1,4 @@
-import { AuthenticationFailedError } from './errors.js'
+import { AuthenticationError } from './errors.js'
 
 export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = 'HS256' } = {}) {
   return {
@@ -23,7 +23,7 @@ export default function useAuth({ jwt }, { key, expiration = 3600, algorithm = '
       try {
         return jwt.verify(token, jwtKey, jwtOptions)
       } catch {
-        throw new AuthenticationFailedError('el token provisto no es valido')
+        throw new AuthenticationError('el token provisto no es valido')
       }
     },
 

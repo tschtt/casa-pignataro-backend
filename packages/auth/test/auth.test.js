@@ -2,7 +2,7 @@ import { describe, it, beforeEach } from 'mocha'
 import { expect } from 'chai'
 import mock from './helpers/mock.js'
 
-import { AuthenticationFailedError } from '../src/errors.js'
+import { AuthenticationError } from '../src/errors.js'
 
 import useAuth from '../src/auth.js'
 
@@ -101,9 +101,9 @@ describe('given the useAuth(dependencies, options) package', () => {
     })
 
     describe('and if the token is invalid', () => {
-      it("throws an AuthenticationFailedError with a message like 'No se pudo autenticar su pedido: el token provisto no es valido'", async () => {
+      it("throws an AuthenticationError with a message like 'No se pudo autenticar su pedido: el token provisto no es valido'", async () => {
         jwt.verify = mock(() => { throw new Error('Token Invalido') })
-        expect(() => auth.decode(token)).to.throw(AuthenticationFailedError)
+        expect(() => auth.decode(token)).to.throw(AuthenticationError)
         expect(() => auth.decode(token)).to.throw('No se pudo autenticar su pedido: el token provisto no es valido')
       })
     })

@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, test } from 'mocha'
 import { expect } from 'chai'
 
-import { AuthenticationFailedError } from '@packages/auth/src/errors.js'
+import { AuthenticationError } from '@packages/auth/src/errors.js'
 import { mock, throwsAsync } from '../_helpers/index.js'
 
 import useSesionEndpoint from '../../src/session/_endpoint.js'
@@ -246,30 +246,30 @@ describe('the session endpoint', () => {
     })
 
     describe("if the request header's token is not valid", () => {
-      it('throws an AuthenticationFailedError', async () => {
-        auth.decode = mock(() => { throw new AuthenticationFailedError() })
-        await throwsAsync('AuthenticationFailedError', () => session.refresh({ request }))
+      it('throws an AuthenticationError', async () => {
+        auth.decode = mock(() => { throw new AuthenticationError() })
+        await throwsAsync('AuthenticationError', () => session.refresh({ request }))
       })
     })
 
     describe("if the token's type is not refresh", () => {
-      it('throws an UnauthorizedError', async () => {
+      it('throws an AuthorizationError', async () => {
         auth.decode.mock.returns = { id: 5, type: 'access' }
-        await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
+        await throwsAsync('AuthorizationError', () => session.refresh({ request }))
       })
     })
 
     describe('if the database token is not found', () => {
-      it('throws an UnauthorizedError', async () => {
+      it('throws an AuthorizationError', async () => {
         sessions.findOne.mock.returns = null
-        await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
+        await throwsAsync('AuthorizationError', () => session.refresh({ request }))
       })
     })
 
     describe('if the tokens are different to each other', () => {
-      it('throws an UnauthorizedError', async () => {
+      it('throws an AuthorizationError', async () => {
         sessions.findOne.mock.returns = { fkAdmin: 5, token: 'OTRO.TOKEN.DISTINTO' }
-        await throwsAsync('UnauthorizedError', () => session.refresh({ request }))
+        await throwsAsync('AuthorizationError', () => session.refresh({ request }))
       })
     })
   })
