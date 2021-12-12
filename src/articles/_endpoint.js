@@ -1,3 +1,5 @@
+import fs from 'fs'
+import sharp from 'sharp'
 
 export default ({ table }) => ({
 
@@ -15,7 +17,24 @@ export default ({ table }) => ({
 
   async insertOne(request) {
     const data = request.body
+
     const id = await table.insertOne(data)
+
+    if (!fs.existsSync('files')) {
+      fs.mkdirSync('files')
+    }
+
+    fs.mkdirSync(`files/${id}`)
+
+    request.files.forEach((file) => {
+      sharp(fs.readFileSync(file.path))
+        .resize(500)
+        .jpeg({ mozjpeg: true })
+        .toFile(`files/${id}/${file.filename}.jpeg`, () => {
+          fs.unlinkSync(file.path)
+        })
+    })
+
     return table.findOne({ id })
   },
 

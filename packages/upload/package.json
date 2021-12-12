@@ -1,0 +1,11 @@
+{
+  "name": "@packages/upload",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "main": "node index.js"
+  },
+  "dependencies": {
+    "multer": "^1.4.4"
+  }
+}
