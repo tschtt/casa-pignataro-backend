@@ -1,0 +1,12 @@
+{
+  "name": "@packages/files",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "main": "node index.js"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

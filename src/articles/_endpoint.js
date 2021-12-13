@@ -1,7 +1,5 @@
-import fs from 'fs'
-import sharp from 'sharp'
 
-export default ({ table }) => ({
+export default ({ table, images: $images }) => ({
 
   async findMany() {
     let items
@@ -10,8 +8,11 @@ export default ({ table }) => ({
   },
 
   async findOne(request) {
-    let item
-    item = await table.findOne({ id: request.params.id })
+    const id = request.params.id
+    const item = await table.findOne({ id })
+
+    item.images = $images.findMany(`articles/${id}`)
+
     return item
   },
 
@@ -20,20 +21,7 @@ export default ({ table }) => ({
 
     const id = await table.insertOne(data)
 
-    if (!fs.existsSync('files')) {
-      fs.mkdirSync('files')
-    }
-
-    fs.mkdirSync(`files/${id}`)
-
-    request.files.forEach((file) => {
-      sharp(fs.readFileSync(file.path))
-        .resize(500)
-        .jpeg({ mozjpeg: true })
-        .toFile(`files/${id}/${file.filename}.jpeg`, () => {
-          fs.unlinkSync(file.path)
-        })
-    })
+    $images.insertMany(`articles/${id}`, request.files)
 
     return table.findOne({ id })
   },
@@ -41,12 +29,28 @@ export default ({ table }) => ({
   async updateOne(request) {
     const id = parseInt(request.params.id)
     const data = request.body
+
+    let images = data.images || []
+
+    images = images.map((image) => {
+      return image.split('/').pop()
+    })
+
+    delete data.images
+
     await table.updateOne({ id }, data)
+
+    $images.removeNotIn(`articles/${id}`, images)
+    $images.insertMany(`articles/${id}`, request.files)
+
     return table.findOne({ id })
   },
 
   async removeOne(request) {
-    return table.removeOne({ id: request.params.id })
+    const id = request.params.id
+    const result = await table.removeOne({ id })
+    $images.removeMany(`articles/${id}`)
+    return result
   },
 
 })

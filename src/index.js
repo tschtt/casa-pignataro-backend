@@ -1,3 +1,4 @@
+import express from 'express'
 import { useApp } from '@packages/router'
 
 import admins from './admins/index.js'
@@ -12,6 +13,7 @@ export default useApp({
   '/categories': categories,
   '/contact': contact,
   '/session': session,
+  '/files': express.static('files'),
   '/': {
     get: () => ({
       success: true,

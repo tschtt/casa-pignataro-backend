@@ -12,9 +12,9 @@ export default ({ express, handler }) => (routes = {}, { errorHandler } = {}) =>
   Object
     .entries(routes)
     .forEach(([route, value]) => {
-      return (value.name === 'router')
-        ? app.use(route, value)
-        : addMethods(route, value)
+      return (value.name === undefined)
+        ? addMethods(route, value)
+        : app.use(route, value)
     })
 
   app.all('*', (req, res) => {
