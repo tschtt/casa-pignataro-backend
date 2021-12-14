@@ -11,7 +11,9 @@ export default ({ table, images: $images }) => ({
     const id = request.params.id
     const item = await table.findOne({ id })
 
-    item.images = $images.findMany(`articles/${id}`)
+    if(item) {
+      item.images = $images.findMany(`articles/${id}`)
+    }
 
     return item
   },
