@@ -44,7 +44,7 @@ export default ({ connection, builder: build }) => (table) => ({
       },
     })
 
-    return result[0]
+    return result[0] || null
   },
 
   async insertMany(rows = []) {
