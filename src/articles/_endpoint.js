@@ -11,11 +11,11 @@ export default ({ table, images: $images }) => ({
     const id = request.params.id
     const item = await table.findOne({ id })
 
-    if(item) {
+    if (item) {
       item.images = $images.findMany(`articles/${id}`)
     }
 
-    return item
+    return item || {}
   },
 
   async insertOne(request) {

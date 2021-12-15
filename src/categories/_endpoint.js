@@ -50,7 +50,7 @@ export default ({ table }) => ({
     if (item) {
       item.categories = await table.findMany({ fkCategorie: request.params.id })
     }
-    return item
+    return item || {}
   },
 
   async insertOne(request) {

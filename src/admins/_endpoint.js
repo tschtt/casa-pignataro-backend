@@ -40,7 +40,7 @@ export default ({ controller }) => ({
 
     const item = await controller.findOne(query, options)
 
-    return item
+    return item || {}
   },
 
   async upsertOne(request) {
