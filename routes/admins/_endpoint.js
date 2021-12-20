@@ -1,69 +1,55 @@
 
-function parseQuery({ only, orderBy, order, limit, offset, ...query }) {
-  if (limit) {
-    limit = parseInt(limit)
-  }
+// function parseQuery({ only, orderBy, order, limit, offset, ...query }) {
+//   if (limit) {
+//     limit = parseInt(limit)
+//   }
 
-  if (offset) {
-    offset = parseInt(offset)
-  }
+//   if (offset) {
+//     offset = parseInt(offset)
+//   }
 
-  if (only) {
-    only = only.replace(/\s/g, '').split(',')
-  }
+//   if (only) {
+//     only = only.replace(/\s/g, '').split(',')
+//   }
 
-  return {
-    query,
-    options: {
-      only,
-      orderBy,
-      order,
-      limit,
-      offset,
-    },
-  }
-}
+//   return {
+//     query,
+//     options: {
+//       only,
+//       orderBy,
+//       order,
+//       limit,
+//       offset,
+//     },
+//   }
+// }
 
-export default ({ controller }) => ({
+export default ({ controller, $admins }) => ({
 
-  async findMany(request) {
-    const { query, options } = parseQuery(request.query)
-    const items = await controller.findMany(query, options)
-
-    return items
+  findMany() {
+    return $admins.findMany()
   },
 
-  async findOne(request) {
-    const { query, options } = parseQuery(request.query)
-
-    query.id = parseInt(request.params.id)
-
-    const item = await controller.findOne(query, options)
-
-    return item || {}
+  findOne(request) {
+    const id = parseInt(request.params.id)
+    return $admins.findOne({ id })
   },
 
   async upsertOne(request) {
-    const data = request.body
+    let data
 
-    data.id = parseInt(request.params.id) || 0
+    data = request.body
+    data.id = parseInt(request.params.id)
 
-    delete data.password
-
-    const id = await controller.upsertOne(data)
-
-    const item = await controller.findOne({ id })
+    const id = await $admins.upsertOne(data)
+    const item = await $admins.findOne({ id })
 
     return item
   },
 
   async removeOne(request) {
-    const { query, options } = parseQuery(request.query)
-
-    query.id = parseInt(request.params.id)
-
-    const removed = await controller.removeOne(query, options)
-
+    const id = parseInt(request.params.id)
+    const removed = await $admins.removeOne({ id })
     return removed
   },
 

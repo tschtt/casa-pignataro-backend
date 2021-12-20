@@ -2,13 +2,36 @@ import { makeFormat } from '@packages/format'
 
 export default ({ $hash }) => makeFormat({
 
-  async clean({ id = 0, active = true, username, password, email, passwordReset = false } = {}) {
+  async clean(
+    {
+      id = 0,
+      active = true,
+      username = '',
+      password = '',
+      email = '',
+      passwordReset = false,
+    } = {},
+    {
+      hidePassword = true,
+      hashPassword = false,
+      defaultPassword = false,
+    } = {},
+  ) {
 
-    if (password) {
+    active = !!active
+    passwordReset = !!passwordReset
+
+    if (hashPassword) {
+      hidePassword = false
       password = await $hash.make(password)
     }
 
-    return {
+    if (defaultPassword) {
+      hidePassword = false
+      password = process.env.DEFAULT_PASSWORD
+    }
+
+    const item = {
       id,
       active,
       username,
@@ -16,6 +39,12 @@ export default ({ $hash }) => makeFormat({
       email,
       passwordReset,
     }
+
+    if (hidePassword) {
+      delete item.password
+    }
+
+    return item
   },
 
 })

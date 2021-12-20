@@ -33,7 +33,7 @@ export default useApp({
       default:
         // eslint-disable-next-line no-console
         console.error(error.stack)
-        res.status(500).send({ success: false, message: 'Error interno' })
+        res.status(500).send({ success: false, message: error.message || 'Error interno' })
         break
     }
   },
