@@ -14,7 +14,8 @@
   "author": "Santiago Taschetta",
   "license": "ISC",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "resources"
   ],
   "dependencies": {
     "bcrypt": "^5.0.1",

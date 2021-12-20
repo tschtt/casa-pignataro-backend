@@ -1,0 +1,5 @@
+{
+  "name": "@app/resources",
+  "main": "index.js",
+  "type": "module"
+}
