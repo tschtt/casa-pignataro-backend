@@ -1,5 +1,4 @@
-/* eslint-disable no-console   */
-import app from './src/index.js'
+import app from './routes/index.js'
 
 const PORT = process.env.APP_PORT
 
