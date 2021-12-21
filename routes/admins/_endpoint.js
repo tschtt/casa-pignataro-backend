@@ -24,13 +24,13 @@
 //   }
 // }
 
-export default ({ controller, $admins }) => ({
+export default ({ $admins }) => ({
 
-  findMany() {
+  async findMany() {
     return $admins.findMany()
   },
 
-  findOne(request) {
+  async findOne(request) {
     const id = parseInt(request.params.id)
     return $admins.findOne({ id })
   },

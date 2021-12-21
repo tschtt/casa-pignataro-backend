@@ -11,6 +11,7 @@ export default () => makeSchema({
     },
     username: {
       type: 'string',
+      minLength: 4,
     },
     password: {
       type: 'string',

@@ -1,24 +1,24 @@
 
 export default ({ $table, $schema, $format }) => ({
 
-  async findMany(query, options) {
+  async findMany(query) {
     let items
     items = await $table.findMany(query)
-    items = await $format.cleanMany(items, options)
+    items = await $format.cleanMany(items)
     return items
   },
 
-  async findOne(query, options) {
+  async findOne(query) {
     let item
     item = await $table.findOne(query)
-    item = await $format.cleanOne(item, options)
+    item = await $format.cleanOne(item)
     return item
   },
 
-  async insertOne(item = {}, options = []) {
+  async insertOne(item = {}) {
     let result
     $schema.validateOne(item)
-    item = await $format.cleanOne(item, { ...options, defaultPassword: true })
+    item = await $format.cleanOne(item, { defaultPassword: true })
     result = await $table.insertOne(item)
     return result
   },
@@ -31,10 +31,11 @@ export default ({ $table, $schema, $format }) => ({
     return result
   },
 
-  async upsertOne(item, options) {
+  async upsertOne(item) {
     let result
+
     if (!item.id) {
-      result = await this.insertOne(item, options)
+      result = await this.insertOne(item)
     } else {
       await this.updateOne({ id: item.id }, item)
       result = item.id
@@ -43,7 +44,7 @@ export default ({ $table, $schema, $format }) => ({
     return result
   },
 
-  removeOne(query) {
+  async removeOne(query) {
     return $table.removeOne(query)
   },
 
