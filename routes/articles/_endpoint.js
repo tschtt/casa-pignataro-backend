@@ -1,9 +1,22 @@
 
-export default ({ table, images: $images }) => ({
+export default ({ table, $images, $categories }) => ({
 
-  async findMany() {
-    let items
-    items = await table.findMany()
+  async findMany(request) {
+    let { limit, ...query } = request.query
+
+    limit = parseInt(limit)
+
+    if (query.fkCategorie) {
+      const fkCategorie = parseInt(query.fkCategorie)
+      const categories = await $categories.findMany({}, { flat: true })
+      const categorieTree = categories.filter((categorie) => categorie.fullId.includes(fkCategorie))
+      const fkCategories = categorieTree.map((categorie) => categorie.id)
+
+      query.fkCategorie = { $in: fkCategories }
+    }
+
+    const items = await table.findMany(query, { limit })
+
     return items
   },
 
