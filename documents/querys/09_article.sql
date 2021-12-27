@@ -1,0 +1,1 @@
+ALTER TABLE `article` ADD `shortDescription` VARCHAR(100) NOT NULL;
