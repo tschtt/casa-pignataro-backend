@@ -15,7 +15,12 @@ export default ({ table, $images, $categories }) => ({
       query.fkCategorie = { $in: fkCategories }
     }
 
-    const items = await table.findMany(query, { limit })
+    let items
+    items = await table.findMany(query, { limit })
+    items = items.map((item) => {
+      item.images = $images.findMany(`articles/${item.id}`)
+      return item
+    })
 
     return items
   },
