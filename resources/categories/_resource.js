@@ -47,9 +47,23 @@ export default ({ $table }) => ({
     return item || {}
   },
 
-  async insertOne(item) {
-    delete item.categories
-    return $table.insertOne(item)
+  async insertOne({ categories, ...item }) {
+    let id
+
+    id = await $table.insertOne(item)
+
+    if (categories) {
+      await this.insertMany(categories, { fkCategorie: id })
+    }
+
+    return id
+  },
+
+  async insertMany(items = [], global = {}) {
+    let result
+    result = items.map((item) => this.insertOne({ ...item, ...global }))
+    result = await Promise.all(result)
+    return result
   },
 
   async updateOne({ id, ...item }) {
