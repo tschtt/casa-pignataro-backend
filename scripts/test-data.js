@@ -3,7 +3,19 @@ import { $articles, $categories } from '@app/resources'
 
 await $categories.insertMany([
   {
+    name: 'Electrodomesticos',
+    order: 1,
+    categories: [
+      { name: 'Heladeras / Freezers' },
+      { name: 'Lavado / Secado' },
+      { name: 'Cocina' },
+      { name: 'Pequeños electrodomesticos' },
+      { name: 'Termotanques' },
+    ],
+  },
+  {
     name: 'Audio y Video',
+    order: 2,
     categories: [
       {
         name: 'Audio',
@@ -26,17 +38,18 @@ await $categories.insertMany([
     ],
   },
   {
-    name: 'Electrodomesticos',
+    name: 'Tecnología',
+    order: 3,
     categories: [
-      { name: 'Heladeras / Freezers' },
-      { name: 'Lavado / Secado' },
-      { name: 'Cocina' },
-      { name: 'Pequeños electrodomesticos' },
-      { name: 'Termotanques' },
+      { name: 'Computadoras' },
+      { name: 'Celulares' },
+      { name: 'Telefonos' },
+      { name: 'Videojuegos' },
     ],
   },
   {
     name: 'Climatización',
+    order: 4,
     categories: [
       { name: 'Aire acondicionado split' },
       { name: 'Aire acondicionado portatil' },
@@ -46,16 +59,8 @@ await $categories.insertMany([
     ],
   },
   {
-    name: 'Tecnología',
-    categories: [
-      { name: 'Computadoras' },
-      { name: 'Celulares' },
-      { name: 'Telefonos' },
-      { name: 'Videojuegos' },
-    ],
-  },
-  {
     name: 'Hogar',
+    order: 5,
     categories: [
       { name: 'Muebles' },
       { name: 'Colchones' },

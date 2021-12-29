@@ -1,0 +1,1 @@
+ALTER TABLE `categorie` ADD `order` INT NOT NULL DEFAULT 0;
