@@ -2,9 +2,17 @@
 export default ({ table, $images, $categories }) => ({
 
   async findMany(request) {
-    let { limit, ...query } = request.query
+    let { limit, search, ...query } = request.query
 
     limit = parseInt(limit)
+
+    if (search) {
+      query.$or = [
+        { code: search },
+        { name: { $like: search } },
+        { description: { $like: search } },
+      ]
+    }
 
     if (query.fkCategorie) {
       const fkCategorie = parseInt(query.fkCategorie)
@@ -16,7 +24,9 @@ export default ({ table, $images, $categories }) => ({
     }
 
     let items
+
     items = await table.findMany(query, { limit })
+
     items = items.map((item) => {
       item.images = $images.findMany(`articles/${item.id}`)
       return item
@@ -26,7 +36,7 @@ export default ({ table, $images, $categories }) => ({
   },
 
   async findOne(request) {
-    const id = request.params.id
+    const id = parseInt(request.params.id)
     const item = await table.findOne({ id })
 
     if (item) {
