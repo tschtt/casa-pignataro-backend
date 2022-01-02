@@ -2,9 +2,10 @@
 export default ({ table, $images, $categories }) => ({
 
   async findMany(request) {
-    let { limit, search, ...query } = request.query
+    let { limit, offset, search, ...query } = request.query
 
     limit = parseInt(limit)
+    offset = parseInt(offset)
 
     if (search) {
       query.$or = [
@@ -25,7 +26,7 @@ export default ({ table, $images, $categories }) => ({
 
     let items
 
-    items = await table.findMany(query, { limit })
+    items = await table.findMany(query, { limit, offset })
 
     items = items.map((item) => {
       item.images = $images.findMany(`articles/${item.id}`)
