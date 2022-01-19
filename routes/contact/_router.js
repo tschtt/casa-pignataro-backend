@@ -5,6 +5,7 @@ export default ({ endpoint }) => useRouter({
   '/:id': {
     get: endpoint.findOne,
     patch: [admin, endpoint.updateOne],
+    delete: [ admin, endpoint.removeOne ],
   },
   '/': {
     get: endpoint.findMany,

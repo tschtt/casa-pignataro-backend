@@ -23,4 +23,8 @@ export default ({ table }) => ({
     return table.findOne({ id })
   },
 
+  async removeOne(request) {
+    return table.removeOne({ id: request.params.id })
+  },
+
 })
