@@ -17,6 +17,10 @@ export default function useImages({ fs, sharp }) {
     },
 
     insertMany(path, files) {
+      if (!files) {
+        return
+      }
+
       if (!fs.existsSync(`files/${path}`)) {
         fs.mkdirSync(`files/${path}`, { recursive: true })
       }

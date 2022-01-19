@@ -68,6 +68,7 @@ export default ({ $table }) => ({
 
   async updateOne({ id, ...item }) {
     delete item.categories
+    delete item.full
     return $table.updateOne({ id }, item)
   },
 
