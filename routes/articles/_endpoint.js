@@ -2,10 +2,13 @@
 export default ({ table, $images, $categories }) => ({
 
   async findMany(request) {
-    let { limit, offset, search, ...query } = request.query
+    let { limit, offset, search, onlyActive, onlyInactive, ...query } = request.query
 
     limit = parseInt(limit)
     offset = parseInt(offset)
+
+    if (onlyActive) query.active = true
+    if (onlyInactive) query.active = false
 
     if (search) {
       query.$or = [

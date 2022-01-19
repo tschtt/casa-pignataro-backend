@@ -1,7 +1,7 @@
 export default ({ $table }) => ({
 
   async findMany(query, { flat } = {}) {
-    const items = await $table.findMany()
+    const items = await $table.findMany(query)
 
     if (flat === true) {
 

@@ -9,8 +9,17 @@ function parseBoolean(value) {
 export default ({ table, $categories }) => ({
 
   async findMany(request) {
-    const flat = parseBoolean(request.query.flat)
-    const items = await $categories.findMany({}, { flat })
+    let { onlyActive, onlyInactive, flat } = request.query
+
+    const query = {}
+
+    if (onlyActive) query.active = true
+    if (onlyInactive) query.active = false
+
+    flat = parseBoolean(flat)
+
+    const items = await $categories.findMany(query, { flat })
+
     return items
   },
 
