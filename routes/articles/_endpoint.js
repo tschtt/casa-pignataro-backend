@@ -2,7 +2,7 @@
 export default ({ table, $images, $categories }) => ({
 
   async findMany(request) {
-    let { limit, offset, search, onlyActive, onlyInactive, ...query } = request.query
+    let { limit, offset, orderBy, sort, search, onlyActive, onlyInactive, ...query } = request.query
 
     limit = parseInt(limit)
     offset = parseInt(offset)
@@ -30,7 +30,7 @@ export default ({ table, $images, $categories }) => ({
     let items
     let count
 
-    items = await table.findMany(query, { limit, offset })
+    items = await table.findMany(query, { limit, offset, orderBy, sort })
     count = await table.count(query)
 
     items = items.map((item) => {
