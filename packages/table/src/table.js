@@ -7,6 +7,18 @@ export default ({ connection, builder: build }) => (table) => ({
     return result[0]
   },
 
+  async count(query) {
+    const result = await this.query({
+      $select: {
+        table,
+        count: true,
+      },
+      $where: query,
+    })
+
+    return result[0]['COUNT(`id`)']
+  },
+
   async findMany(query = {}, options = {}) {
     const result = await this.query({
       $select: {

@@ -13,8 +13,11 @@ export default ({ format }) => function build(expression, { isNot = false, joint
   const operators = {
 
     // Main operations
-    $select({ table, only }) {
-      if (only) {
+    $select({ table, only, count }) {
+      if (count) {
+        state.add('SELECT COUNT(`id`) FROM ??', [table])
+      }
+      else if (only) {
         state.add('SELECT ?? FROM ??', [only, table])
       } else {
         state.add('SELECT * FROM ??', [table])

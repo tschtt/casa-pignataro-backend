@@ -28,15 +28,20 @@ export default ({ table, $images, $categories }) => ({
     }
 
     let items
+    let count
 
     items = await table.findMany(query, { limit, offset })
+    count = await table.count(query)
 
     items = items.map((item) => {
       item.images = $images.findMany(`articles/${item.id}`)
       return item
     })
 
-    return items
+    return {
+      items,
+      count,
+    }
   },
 
   async findOne(request) {
