@@ -1,9 +1,11 @@
+/* eslint-disable no-mixed-operators */
 
 export default ({ table, $images, $categories }) => ({
 
   async findMany(request) {
-    let { limit, offset, orderBy, sort, search, onlyActive, onlyInactive, ...query } = request.query
+    let { paginated, limit, offset, page, orderBy, sort, search, onlyActive, onlyInactive, ...query } = request.query
 
+    page = parseInt(page) || 1
     limit = parseInt(limit)
     offset = parseInt(offset)
 
@@ -27,6 +29,18 @@ export default ({ table, $images, $categories }) => ({
       query.fkCategorie = { $in: fkCategories }
     }
 
+    if (paginated) {
+
+      const result = await table.findPaginated(query, { page, orderBy, sort })
+
+      result.items = result.items.map((item) => {
+        item.images = $images.findMany(`articles/${item.id}`)
+        return item
+      })
+
+      return result
+    }
+
     let items
     let count
 
@@ -42,6 +56,22 @@ export default ({ table, $images, $categories }) => ({
       items,
       count,
     }
+
+    // let items
+    // let count
+
+    // items = await table.findMany(query, { limit, offset, orderBy, sort })
+    // count = await table.count(query)
+
+    // items = items.map((item) => {
+    //   item.images = $images.findMany(`articles/${item.id}`)
+    //   return item
+    // })
+
+    // return {
+    //   items,
+    //   count,
+    // }
   },
 
   async findOne(request) {

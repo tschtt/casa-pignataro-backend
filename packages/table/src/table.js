@@ -1,4 +1,6 @@
 
+const PAGE_SIZE = parseInt(process.env.DATABASE_PAGE_SIZE)
+
 export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
@@ -17,6 +19,28 @@ export default ({ connection, builder: build }) => (table) => ({
     })
 
     return result[0]['COUNT(`id`)']
+  },
+
+  async findPaginated(query, { page = 1, only, orderBy, sort } = {}) {
+    const count = await this.count(query)
+
+    const items = await this.findMany(query, {
+      only,
+      orderBy,
+      sort,
+      limit: PAGE_SIZE,
+      offset: PAGE_SIZE * (page - 1),
+    })
+
+    return {
+      items,
+      pagination: {
+        item_count: count,
+        page_first: 1,
+        page_current: page,
+        page_last: parseInt(count / PAGE_SIZE) + 1,
+      },
+    }
   },
 
   async findMany(query = {}, options = {}) {
