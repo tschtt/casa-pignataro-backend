@@ -19,6 +19,9 @@ export default ({ table, $images, $categories }) => ({
     if (limit) {
       limit = parseInt(limit)
     }
+    if (offset) {
+      offset = parseInt(offset)
+    }
 
     let { search, fkCategorie, active } = query
 
@@ -28,7 +31,7 @@ export default ({ table, $images, $categories }) => ({
       query.active = parseBoolean(active)
     }
     if (fkCategorie) {
-      const fkCategorie = parseInt(fkCategorie)
+      fkCategorie = parseInt(fkCategorie)
       const categories = await $categories.findMany({}, { flat: true })
       const categorieTree = categories.filter((categorie) => categorie.fullId.includes(fkCategorie))
       const fkCategories = categorieTree.map((categorie) => categorie.id)
