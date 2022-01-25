@@ -3,7 +3,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "main": "node -r dotenv/config index.js"
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1"
