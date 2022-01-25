@@ -18,6 +18,7 @@ export const makeFormat = ({ clean, fill }) => ({
 
   async fillOne(item = {}, options = {}) {
     if (fill) {
+      item = await clean({ ...item }, options)
       item = await fill({ ...item }, options)
     }
     return item

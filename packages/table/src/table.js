@@ -5,6 +5,7 @@ export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
     const sql = build(query)
+    // console.log(sql)
     const result = await connection.query(sql)
     return result[0]
   },

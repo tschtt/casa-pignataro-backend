@@ -1,14 +1,21 @@
 
+import fs from 'fs'
+
 function parseBoolean(value) {
-  if (value === 'true' || value === 1) return true
-  if (value === 'false' || value === 0) return false
+  if (value === false || value === 'true' || value === 1) return true
+  if (value === false || value === 'false' || value === 0) return false
   return value
 }
 
-export default ({ table, $images, $categories }) => ({
+export default ({ table, $articles, $images, $categories }) => ({
 
   async findMany(request) {
     let { paginate, page, orderBy, sort, limit, offset, ...query } = request.query
+    let { search, fkCategorie, active } = query
+
+    query = {}
+
+    // Options
 
     if (paginate) {
       paginate = parseBoolean(paginate)
@@ -23,9 +30,7 @@ export default ({ table, $images, $categories }) => ({
       offset = parseInt(offset)
     }
 
-    let { search, fkCategorie, active } = query
-
-    query = {}
+    // Query
 
     if (active) {
       query.active = parseBoolean(active)
@@ -46,80 +51,79 @@ export default ({ table, $images, $categories }) => ({
         { shortDescription: { $like: search } },
       ]
     }
-    if (paginate) {
 
-      const result = await table.findPaginated(query, { page, orderBy, sort })
+    const result = paginate
+      ? await $articles.findPaginated(query, { page, orderBy, sort })
+      : await $articles.findMany(query, { limit, offset, orderBy, sort })
 
-      result.items = result.items.map((item) => {
-        item.images = $images.findMany(`articles/${item.id}`)
-        return item
-      })
-
-      return result
-    }
-
-    let items
-    let count
-
-    items = await table.findMany(query, { limit, offset, orderBy, sort })
-    count = await table.count(query)
-
-    items = items.map((item) => {
-      item.images = $images.findMany(`articles/${item.id}`)
-      return item
-    })
-
-    return {
-      items,
-      count,
-    }
+    return result
   },
 
   async findOne(request) {
     const id = parseInt(request.params.id)
-    const item = await table.findOne({ id })
-
-    if (item) {
-      item.images = $images.findMany(`articles/${id}`)
-    }
-
-    return item || {}
+    const item = await $articles.findOne({ id })
+    return item
   },
 
   async insertOne(request) {
-    const data = request.body
+    let item, id
 
-    const id = await table.insertOne(data)
+    item = request.body
 
-    $images.insertMany(`articles/${id}`, request.files)
+    item.id = 0
+    item.fkCategorie = parseInt(item.fkCategorie)
+    item.active = parseBoolean(item.active)
+    item.value = parseFloat(item.value)
 
-    return table.findOne({ id })
+    item.images = request.files.map((file) => {
+      const path =  file.path.replace(/\\/g, '/')
+      const extension = file.originalname.split('.').pop()
+      fs.renameSync(path, `${path}.${extension}`)
+      return `${path}.${extension}`
+    })
+
+    id = await $articles.insertOne(item)
+
+    return $articles.findOne({ id })
   },
 
   async updateOne(request) {
-    const id = parseInt(request.params.id)
-    const data = request.body
+    let item, id
 
-    let images = data.images || []
+    id = parseInt(request.params.id)
 
-    images = images.map((image) => {
-      return image.split('/').pop()
+    item = request.body
+
+    item.id = id
+    item.fkCategorie = parseInt(item.fkCategorie)
+    item.active = parseBoolean(item.active)
+    item.value = parseFloat(item.value)
+
+    if (!item.images) {
+      item.images = []
+    }
+
+    item.images = item.images.map((image) => {
+      return image.replace(`${process.env.APP_URL}/`, '')
     })
 
-    delete data.images
+    if (request.files) {
+      item.images.push(...request.files.map((file) => {
+        const path =  file.path.replace(/\\/g, '/')
+        const extension = file.originalname.split('.').pop()
+        fs.renameSync(path, `${path}.${extension}`)
+        return `${path}.${extension}`
+      }))
+    }
 
-    await table.updateOne({ id }, data)
+    await $articles.updateOne({ id }, item)
 
-    $images.removeNotIn(`articles/${id}`, images)
-    $images.insertMany(`articles/${id}`, request.files)
-
-    return table.findOne({ id })
+    return $articles.findOne({ id })
   },
 
   async removeOne(request) {
     const id = request.params.id
-    const result = await table.removeOne({ id })
-    $images.removeMany(`articles/${id}`)
+    const result = await $articles.removeOne({ id })
     return result
   },
 

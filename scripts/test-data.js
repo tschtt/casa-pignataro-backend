@@ -7,7 +7,13 @@ await connection.query('TRUNCATE article')
 await connection.query('TRUNCATE categorie')
 await connection.query('SET FOREIGN_KEY_CHECKS = 1')
 
-fs.rmSync('files', { recursive: true })
+if (fs.existsSync('files')) {
+  fs.rmSync('files', { recursive: true })
+}
+
+if (fs.existsSync('scripts/temp')) {
+  fs.rmSync('scripts/temp', { recursive: true })
+}
 
 await $categories.insertMany([
   {
@@ -130,7 +136,9 @@ const values = [
   37699,
 ]
 
-const images = fs.readdirSync('documents/images').map(file => `documents/images/${file}`)
+const images = fs.readdirSync('documents/images')/* .map((file) => `documents/images/${file}`) */
+
+fs.mkdirSync('scripts/temp')
 
 await $articles.insertMany(fkCategories.map((fkCategorie, index) => {
   let article = {
@@ -146,12 +154,19 @@ await $articles.insertMany(fkCategories.map((fkCategorie, index) => {
   article.name = pickRandom(names)
   article.value = pickRandom(values)
 
-  article.images.push({ path: pickRandom(images), name: `image-${index}1.jpg` })
-  article.images.push({ path: pickRandom(images), name: `image-${index}2.jpg` })
-  article.images.push({ path: pickRandom(images), name: `image-${index}3.jpg` })
+  article.images.push(pickRandom(images))
+  article.images.push(pickRandom(images))
+  article.images.push(pickRandom(images))
+
+  article.images = article.images.map((image, indexImage) => {
+    fs.copyFileSync(`documents/images/${image}`, `scripts/temp/${index}-${indexImage}-${image}`)
+    return `scripts/temp/${index}-${indexImage}-${image}`
+  })
 
   return article
 }))
+
+fs.rmdirSync('scripts/temp')
 
 connection.end()
 
