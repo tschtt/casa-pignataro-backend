@@ -1,9 +1,23 @@
 
 export default ({ $table, $schema, $format }) => ({
 
-  async findMany(query) {
+  async findPaginated(query, options) {
+    let items, pagination
+
+    const result = await $table.findPaginated(query, options)
+
+    items = await $format.cleanMany(result.items)
+    pagination = result.pagination
+
+    return {
+      items,
+      pagination,
+    }
+  },
+
+  async findMany(query, options) {
     let items
-    items = await $table.findMany(query)
+    items = await $table.findMany(query, options)
     items = await $format.cleanMany(items)
     return items
   },
