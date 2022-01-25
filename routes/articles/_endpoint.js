@@ -1,35 +1,49 @@
-/* eslint-disable no-mixed-operators */
+
+function parseBoolean(value) {
+  if (value === 'true' || value === 1) return true
+  if (value === 'false' || value === 0) return false
+  return value
+}
 
 export default ({ table, $images, $categories }) => ({
 
   async findMany(request) {
-    let { paginated, limit, offset, page, orderBy, sort, search, onlyActive, onlyInactive, ...query } = request.query
+    let { paginate, page, orderBy, sort, limit, offset, ...query } = request.query
 
-    page = parseInt(page) || 1
-    limit = parseInt(limit)
-    offset = parseInt(offset)
-
-    if (onlyActive) query.active = true
-    if (onlyInactive) query.active = false
-
-    if (search) {
-      query.$or = [
-        { code: search },
-        { name: { $like: search } },
-        { description: { $like: search } },
-      ]
+    if (paginate) {
+      paginate = parseBoolean(paginate)
+    }
+    if (page) {
+      page = parseInt(page)
+    }
+    if (limit) {
+      limit = parseInt(limit)
     }
 
-    if (query.fkCategorie) {
-      const fkCategorie = parseInt(query.fkCategorie)
+    let { search, fkCategorie, active } = query
+
+    query = {}
+
+    if (active) {
+      query.active = parseBoolean(active)
+    }
+    if (fkCategorie) {
+      const fkCategorie = parseInt(fkCategorie)
       const categories = await $categories.findMany({}, { flat: true })
       const categorieTree = categories.filter((categorie) => categorie.fullId.includes(fkCategorie))
       const fkCategories = categorieTree.map((categorie) => categorie.id)
 
       query.fkCategorie = { $in: fkCategories }
     }
-
-    if (paginated) {
+    if (search) {
+      query.$or = [
+        { code: search },
+        { name: { $like: search } },
+        { description: { $like: search } },
+        { shortDescription: { $like: search } },
+      ]
+    }
+    if (paginate) {
 
       const result = await table.findPaginated(query, { page, orderBy, sort })
 
@@ -56,22 +70,6 @@ export default ({ table, $images, $categories }) => ({
       items,
       count,
     }
-
-    // let items
-    // let count
-
-    // items = await table.findMany(query, { limit, offset, orderBy, sort })
-    // count = await table.count(query)
-
-    // items = items.map((item) => {
-    //   item.images = $images.findMany(`articles/${item.id}`)
-    //   return item
-    // })
-
-    // return {
-    //   items,
-    //   count,
-    // }
   },
 
   async findOne(request) {

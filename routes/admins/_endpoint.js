@@ -1,8 +1,8 @@
 
 function parseBoolean(value) {
-  if (value === 'true' || value === 1) return true
-  if (value === 'false' || value === 0) return false
-  return value
+  if (value === true || value === 'true' || value === 1) return true
+  if (value === false || value === 'false' || value === 0) return false
+  return undefined
 }
 
 export default ({ $admins }) => ({
@@ -14,14 +14,28 @@ export default ({ $admins }) => ({
     if (page) page = parseInt(page)
     if (limit) limit = parseInt(limit)
 
-    let { active, username, email, passwordReset } = query
+    let { search, active, username, email, passwordReset } = query
 
     query = {}
 
-    if (active) query.active = parseBoolean(active)
-    if (username) query.username = { $like: username }
-    if (email) query.email = { $like: email }
-    if (passwordReset) query.passwordReset = parseBoolean(passwordReset)
+    if (active) {
+      query.active = parseBoolean(active)
+    }
+    if (passwordReset) {
+      query.passwordReset = parseBoolean(passwordReset)
+    }
+    if (username) {
+      query.username = username
+    }
+    if (email) {
+      query.email = email
+    }
+    if (search) {
+      query.$or = [
+        { username: { $like: search } },
+        { email: { $like: search } },
+      ]
+    }
 
     return paginate
       ? $admins.findPaginated(query, { page, orderBy, sort })

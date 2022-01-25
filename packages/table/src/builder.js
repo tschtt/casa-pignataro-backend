@@ -95,7 +95,7 @@ export default ({ format }) => function build(expression, { isNot = false, joint
     },
     $or: (expressions = []) => {
       const block = expressions.map((expression) => build(expression)).join(') OR (')
-      state.add(`(${block})`)
+      state.add(`((${block}))`)
     },
     $nor: (expressions = []) => {
       const block = expressions.map((expression) => build(expression, { isNot: true })).join(') OR (')
