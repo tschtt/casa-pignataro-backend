@@ -1,0 +1,1 @@
+drop table `casa_pignataro`.`categorie`;
