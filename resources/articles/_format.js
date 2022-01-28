@@ -6,7 +6,7 @@ export default ({ $images }) => makeFormat({
     {
       id = 0,
       active = true,
-      fkCategorie = 0,
+      fkCategory = 0,
       code = '',
       name = '',
       value = 0,
@@ -17,7 +17,7 @@ export default ({ $images }) => makeFormat({
     return {
       id,
       active,
-      fkCategorie,
+      fkCategory,
       code,
       name,
       value,

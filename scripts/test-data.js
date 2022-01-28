@@ -140,9 +140,9 @@ const images = fs.readdirSync('documents/images')/* .map((file) => `documents/im
 
 fs.mkdirSync('scripts/temp')
 
-await $articles.insertMany(fkCategories.map((fkCategorie, index) => {
+await $articles.insertMany(fkCategories.map((fkCategory, index) => {
   let article = {
-    fkCategorie,
+    fkCategory,
     code: `ART-${index}`,
     name: `Artículo ${index}`,
     value: 1000,

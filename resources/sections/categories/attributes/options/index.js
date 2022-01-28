@@ -6,6 +6,7 @@ import useResource from './_resource.js'
 
 export default () => {
   const table = useTable('attribute_value')
+
   const schema = useSchema()
   const format = useFormat()
 

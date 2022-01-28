@@ -7,11 +7,11 @@ function parseBoolean(value) {
   return value
 }
 
-export default ({ table, $articles, $images, $categories }) => ({
+export default ({ $articles }) => ({
 
   async findMany(request) {
     let { paginate, page, orderBy, sort, limit, offset, ...query } = request.query
-    let { search, fkCategorie, active } = query
+    let { search, active } = query
 
     query = {}
 
@@ -34,14 +34,6 @@ export default ({ table, $articles, $images, $categories }) => ({
 
     if (active) {
       query.active = parseBoolean(active)
-    }
-    if (fkCategorie) {
-      fkCategorie = parseInt(fkCategorie)
-      const categories = await $categories.findMany({}, { flat: true })
-      const categorieTree = categories.filter((categorie) => categorie.fullId.includes(fkCategorie))
-      const fkCategories = categorieTree.map((categorie) => categorie.id)
-
-      query.fkCategorie = { $in: fkCategories }
     }
     if (search) {
       query.$or = [
@@ -71,7 +63,7 @@ export default ({ table, $articles, $images, $categories }) => ({
     item = request.body
 
     item.id = 0
-    item.fkCategorie = parseInt(item.fkCategorie)
+    item.fkCategory = parseInt(item.fkCategory)
     item.active = parseBoolean(item.active)
     item.value = parseFloat(item.value)
 
@@ -95,7 +87,7 @@ export default ({ table, $articles, $images, $categories }) => ({
     item = request.body
 
     item.id = id
-    item.fkCategorie = parseInt(item.fkCategorie)
+    item.fkCategory = parseInt(item.fkCategory)
     item.active = parseBoolean(item.active)
     item.value = parseFloat(item.value)
 

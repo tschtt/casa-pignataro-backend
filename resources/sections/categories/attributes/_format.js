@@ -2,7 +2,7 @@ import makeFormat from '@packages/format'
 
 export default ({ $options }) => makeFormat({
 
-  async clean({ id, fkCategorie, active, name }) {
+  async clean({ id, fkCategory, active, name }) {
     active = !!active
     return {
       id,

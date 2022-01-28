@@ -6,10 +6,9 @@ import useSchema from './_schema.js'
 import useFormat from './_format.js'
 import useResource from './_resource.js'
 
+export const $options = useOptions()
 export default () => {
   const table = useTable('attribute')
-
-  const $options = useOptions()
 
   const schema = useSchema()
   const format = useFormat({ $options })

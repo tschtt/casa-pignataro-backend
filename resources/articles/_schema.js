@@ -9,7 +9,7 @@ export default () => makeSchema({
     active: {
       type: 'boolean',
     },
-    fkCategorie: {
+    fkCategory: {
       type: 'integer',
     },
     code: {
@@ -29,7 +29,7 @@ export default () => makeSchema({
     },
   },
   required: [
-    'fkCategorie',
+    'fkCategory',
     'code',
     'name',
     'value',

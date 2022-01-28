@@ -6,10 +6,10 @@ import useSchema from './_schema.js'
 import useFormat from './_format.js'
 import useResource from './_resource.js'
 
+export const $categories = useCategories()
+
 export default () => {
   const table = useTable('section')
-
-  const $categories = useCategories()
 
   const schema = useSchema()
   const format = useFormat({ $categories })
