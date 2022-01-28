@@ -1,0 +1,5 @@
+{
+  "name": "@resources/admins",
+  "main": "index.js",
+  "type": "module"
+}

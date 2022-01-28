@@ -1,24 +1,26 @@
 import fs from 'fs'
 import { connection } from '@packages/table'
-import { $articles, $categories } from '@app/resources'
+
+import { $categories } from '@resources/sections'
+import { $articles, $sections } from '@app/resources'
 
 await connection.query('SET FOREIGN_KEY_CHECKS = 0')
 await connection.query('TRUNCATE article')
-await connection.query('TRUNCATE categorie')
+await connection.query('TRUNCATE section')
+await connection.query('TRUNCATE category')
 await connection.query('SET FOREIGN_KEY_CHECKS = 1')
 
 if (fs.existsSync('files')) {
   fs.rmSync('files', { recursive: true })
 }
 
-if (fs.existsSync('scripts/temp')) {
-  fs.rmSync('scripts/temp', { recursive: true })
+if (fs.existsSync('data/temp')) {
+  fs.rmSync('data/temp', { recursive: true })
 }
 
-await $categories.insertMany([
+await $sections.insertMany([
   {
     name: 'Electrodomesticos',
-    order: 1,
     categories: [
       { name: 'Heladeras / Freezers' },
       { name: 'Lavado / Secado' },
@@ -29,31 +31,19 @@ await $categories.insertMany([
   },
   {
     name: 'Audio y Video',
-    order: 2,
     categories: [
-      {
-        name: 'Audio',
-        categories: [
-          { name: 'Televisores' },
-          { name: 'Accesorios' },
-        ],
-      },
-      {
-        name: 'Video',
-        categories: [
-          { name: 'Portables' },
-          { name: 'Bafles' },
-          { name: 'Home theaters' },
-          { name: 'Auriculares' },
-          { name: 'Instrumentos musicales' },
-          { name: 'Microfonos' },
-        ],
-      },
+      { name: 'Televisores' },
+      { name: 'Accesorios' },
+      { name: 'Portables' },
+      { name: 'Bafles' },
+      { name: 'Home theaters' },
+      { name: 'Auriculares' },
+      { name: 'Instrumentos musicales' },
+      { name: 'Microfonos' },
     ],
   },
   {
     name: 'Tecnología',
-    order: 3,
     categories: [
       { name: 'Computadoras' },
       { name: 'Celulares' },
@@ -63,7 +53,6 @@ await $categories.insertMany([
   },
   {
     name: 'Climatización',
-    order: 4,
     categories: [
       { name: 'Aire acondicionado split' },
       { name: 'Aire acondicionado portatil' },
@@ -74,7 +63,6 @@ await $categories.insertMany([
   },
   {
     name: 'Hogar',
-    order: 5,
     categories: [
       { name: 'Muebles' },
       { name: 'Colchones' },
@@ -88,7 +76,7 @@ await $categories.insertMany([
   },
 ])
 
-const categories = await $categories.findMany({}, { flat: true })
+const categories = await $categories.findMany()
 const fkCategories = categories.map((categorie) => categorie.id)
 
 const names = [
@@ -138,7 +126,7 @@ const values = [
 
 const images = fs.readdirSync('documents/images')/* .map((file) => `documents/images/${file}`) */
 
-fs.mkdirSync('scripts/temp')
+fs.mkdirSync('data/temp')
 
 await $articles.insertMany(fkCategories.map((fkCategory, index) => {
   let article = {
@@ -159,14 +147,14 @@ await $articles.insertMany(fkCategories.map((fkCategory, index) => {
   article.images.push(pickRandom(images))
 
   article.images = article.images.map((image, indexImage) => {
-    fs.copyFileSync(`documents/images/${image}`, `scripts/temp/${index}-${indexImage}-${image}`)
-    return `scripts/temp/${index}-${indexImage}-${image}`
+    fs.copyFileSync(`documents/images/${image}`, `data/temp/${index}-${indexImage}-${image}`)
+    return `data/temp/${index}-${indexImage}-${image}`
   })
 
   return article
 }))
 
-fs.rmdirSync('scripts/temp')
+fs.rmdirSync('data/temp')
 
 connection.end()
 

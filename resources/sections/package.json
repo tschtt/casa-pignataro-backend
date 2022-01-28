@@ -1,0 +1,5 @@
+{
+  "name": "@resources/sections",
+  "main": "index.js",
+  "type": "module"
+}
