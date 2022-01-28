@@ -230,7 +230,7 @@ describe('the useBuilder(dependencies)(expression, options) module', () => {
             { code: { $lt: 20 } },
           ],
         } })
-        expect(result).to.equals("WHERE (`name` LIKE 'Pedro') OR (`code` < 20)")
+        expect(result).to.equals("WHERE ((`name` LIKE 'Pedro') OR (`code` < 20))")
       })
     })
 

@@ -69,9 +69,24 @@ export default ({ format }) => function build(expression, { isNot = false, joint
     $gte: ({ field, value }) => (isNot
       ? state.add('?? < ?', [field, value])
       : state.add('?? >= ?', [field, value])),
-    $in: ({ field, value }) => (isNot
-      ? state.add('?? NOT IN (?)', [field, value])
-      : state.add('?? IN (?)', [field, value])),
+    $in: ({ field, value }) => {
+      if (typeof value[0] === 'object') {
+        value = value.map((v) => v[field])
+        value = value.filter((v) => v !== null && v !== undefined)
+      }
+      return isNot
+        ? state.add('?? NOT IN (?)', [field, value])
+        : state.add('?? IN (?)', [field, value])
+    },
+    $nin: ({ field, value }) => {
+      if (typeof value[0] === 'object') {
+        value = value.map((v) => v[field])
+        value = value.filter((v) => v !== null && v !== undefined)
+      }
+      return isNot
+        ? state.add('?? IN (?)', [field, value])
+        : state.add('?? NOT IN (?)', [field, value])
+    },
     $lt: ({ field, value }) => (isNot
       ? state.add('?? >= ?', [field, value])
       : state.add('?? < ?', [field, value])),
@@ -81,9 +96,6 @@ export default ({ format }) => function build(expression, { isNot = false, joint
     $ne: ({ field, value }) => (isNot
       ? state.add('?? LIKE ?', [field, value])
       : state.add('?? NOT LIKE ?', [field, value])),
-    $nin: ({ field, value }) => (isNot
-      ? state.add('?? IN (?)', [field, value])
-      : state.add('?? NOT IN (?)', [field, value])),
     // Logical
     $not: ({ field, value }) => {
       const result = build({ [field]: value }, { isNot: !isNot })

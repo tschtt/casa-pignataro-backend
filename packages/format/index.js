@@ -26,7 +26,9 @@ export const makeFormat = ({ clean, fill }) => ({
 
   async fillMany(items = [], { globals, ...options } = {}) {
     if (fill) {
-      items = await items.map((item) => fill({ ...item, ...globals }, options))
+      items = items.map((item) => clean({ ...item, ...globals }, options))
+      items = await Promise.all(items)
+      items = items.map((item) => fill({ ...item, ...globals }, options))
       items = await Promise.all(items)
     }
     return items

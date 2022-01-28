@@ -6,6 +6,7 @@ import articles from './articles/index.js'
 import categories from './categories/index.js'
 import contact from './contact/index.js'
 import session from './session/index.js'
+import sections from './sections/index.js'
 
 export default useApp({
   '/admins': admins,
@@ -13,6 +14,7 @@ export default useApp({
   '/categories': categories,
   '/contact': contact,
   '/session': session,
+  '/sections': sections,
   '/files': express.static('files'),
   '/': {
     get: () => ({
