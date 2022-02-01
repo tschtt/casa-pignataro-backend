@@ -176,6 +176,9 @@ export default ({ format }) => function build(expression, { isNot = false, joint
               }
             }
             break
+          case 'undefined':
+            operations.push({ operator: '$eq', props: { field: name, value: null } })
+            break
           default:
             throw new TypeNotSupportedError()
         }

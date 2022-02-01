@@ -4,9 +4,12 @@ const PAGE_SIZE = parseInt(process.env.DATABASE_PAGE_SIZE)
 export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
+    // console.log('EXPRESSION: ', query)
     const sql = build(query)
     console.log(sql)
+    console.log('')
     const result = await connection.query(sql)
+    // console.log('RESULT: ', result[0])
     return result[0]
   },
 
@@ -137,14 +140,15 @@ export default ({ connection, builder: build }) => (table) => ({
     return !!result.affectedRows
   },
 
-  async upsertOne({ id, ...data }, options = {}) {
+  async upsertOne(query, data) {
+    const { id } = await this.findOne(query) || {}
+
     if (id) {
-      const wasChanged = await this.updateOne({ id }, data, options)
-      if (wasChanged) {
-        return id
-      }
+      await this.updateOne({ id }, data)
+      return id
     }
-    return this.insertOne(data, options)
+
+    return this.insertOne(data)
   },
 
   async removeMany(query = {}, options = {}) {

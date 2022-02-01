@@ -11,12 +11,11 @@ export default ({ $attributes, $values }) => makeFormat({
   },
 
   async fill(item) {
-    item.value = await $values.findOne({ id: item.fkAttributeValue })
-    item.attribute = await $attributes.findOne({ id: item.value.fkAttribute })
+    const value = await $values.findOne({ id: item.fkAttributeValue })
+    const attribute = await $attributes.findOne({ id: value.fkAttribute })
     return {
-      id: item.id,
-      name: item.attribute.name,
-      value: item.value.name,
+      name: attribute.name,
+      value: value.name,
     }
   },
 

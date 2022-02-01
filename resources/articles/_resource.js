@@ -1,5 +1,5 @@
 
-export default ({ $table, $schema, $format, $images }) => ({
+export default ({ $table, $schema, $format, $images, $attributes }) => ({
 
   async findPaginated(query, options) {
     let items, pagination
@@ -29,7 +29,7 @@ export default ({ $table, $schema, $format, $images }) => ({
     return item
   },
 
-  async insertOne({ images, ...item }) {
+  async insertOne({ images, attributes, ...item }) {
     let id
 
     $schema.validateOne(item)
@@ -37,9 +37,8 @@ export default ({ $table, $schema, $format, $images }) => ({
     item = await $format.cleanOne(item)
     id = await $table.insertOne(item)
 
-    if (images) {
-      await $images.insertMany(images, { fkArticle: id })
-    }
+    await $images.insertMany(images, { fkArticle: id })
+    await $attributes.insertMany(attributes, { fkArticle: id, fkCategory: item.fkCategory })
 
     return id
   },
@@ -51,13 +50,16 @@ export default ({ $table, $schema, $format, $images }) => ({
     return result
   },
 
-  async updateOne({ id }, { images, ...item }) {
+  async updateOne({ id }, { images, category, attributes, ...item }) {
     let result
+
     $schema.validateOne(item)
-    item = await $format.cleanOne(item)
+
     result = await $table.updateOne({ id }, item)
 
     await $images.updateMany({ fkArticle: id }, images)
+    await $attributes.removeMany({ fkArticle: id })
+    await $attributes.insertMany(attributes, { fkArticle: id, fkCategory: item.fkCategory })
 
     return result
   },

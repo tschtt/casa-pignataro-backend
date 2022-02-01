@@ -11,7 +11,9 @@ export default ({ table, $categories, schema, format }) => ({
   async findOne(query) {
     let item
     item = await table.findOne(query)
-    item = await format.fillOne(item)
+    if (item) {
+      item = await format.fillOne(item)
+    }
     return item
   },
 

@@ -11,7 +11,7 @@ export default ({ $categories }) => makeFormat({
     }
   },
 
-  async fill(item) {
+  async fill(item = {}) {
     item.categories = await $categories.findMany({ fkSection: item.id })
     return item
   },

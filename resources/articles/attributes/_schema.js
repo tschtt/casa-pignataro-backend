@@ -3,22 +3,22 @@ import makeSchema from '@packages/schema'
 export default () => makeSchema({
   type: 'object',
   properties: {
-    id: {
-      type: 'integer',
+    fkArticle: {
+      type: 'number',
     },
-    fkAttribute: {
-      type: 'integer',
-    },
-    active: {
-      type: 'boolean',
+    fkCategory: {
+      type: 'number',
     },
     name: {
       type: 'string',
     },
+    value: {
+      type: 'string',
+    },
   },
   required: [
-    'fkAttribute',
     'name',
+    'value',
   ],
   additionalProperties: false,
 })

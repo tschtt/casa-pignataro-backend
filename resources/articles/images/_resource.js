@@ -44,8 +44,9 @@ export default () => ({
 
     // move every image in the array to the temp folder
     images.forEach((path) => {
-      const name = path.split('/').pop()
+      path = path.replace(`${process.env.APP_URL}/`, '')
       if (fs.existsSync(path)) {
+        const name = path.split('/').pop()
         fs.renameSync(path, `${path_temp}/${name}`)
       }
     })

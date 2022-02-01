@@ -1,6 +1,6 @@
-import useAdmins from './admins/index.js'
-import useArticles from './articles/index.js'
-import useSections from './sections/index.js'
+import useAdmins from '@resources/admins'
+import useArticles from '@resources/articles'
+import useSections from '@resources/sections'
 
 export const $admins = useAdmins()
 export const $articles = useArticles()

@@ -31,7 +31,6 @@ export default ({ $images, $categories, $attributes }) => makeFormat({
     article.category = await $categories.findOne({ id: article.fkCategory })
     article.attributes = await $attributes.findMany({ fkArticle: article.id })
     article.images = await $images.findMany({ fkArticle: article.id })
-    delete article.fkCategory
     return article
   },
 

@@ -7,8 +7,10 @@ import useResource from './_resource.js'
 export default () => {
   const table = useTable('category')
 
+  const $section = useTable('section')
+
   const schema = useSchema()
-  const format = useFormat()
+  const format = useFormat({ $section })
 
   return useResource({
     table,
