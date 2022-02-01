@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { TypeNotSupportedError } from './errors.js'
 
 export default ({ format }) => function build(expression, { isNot = false, joint = ' ' } = {}) {
@@ -43,6 +44,36 @@ export default ({ format }) => function build(expression, { isNot = false, joint
     },
     $delete({ table }) {
       state.add('DELETE FROM ??', [table])
+    },
+
+    // Join
+    $join(value) {
+      const parse_object = ({ type, table, on, equals }) => {
+        const parse_type = (value = '') => {
+          switch (value.toLowerCase()) {
+            case 'inner': return 'INNER'
+            case 'left':  return 'LEFT'
+            case 'right': return 'RIGHT'
+            case 'cross': return 'CROSS'
+            default: return 'INNER'
+          }
+        }
+
+        state.add(`${parse_type(type)} JOIN ?? ON ?? = ??`, [table, on, equals])
+      }
+
+      const parse_array = (joins = []) => {
+        joins.forEach(parse_object)
+      }
+
+      if (typeof value === 'object') {
+        if (Array.isArray(value)) {
+          parse_array(value)
+        } else {
+          parse_object(value)
+        }
+
+      }
     },
 
     // Filter operations

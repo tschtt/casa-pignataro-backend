@@ -26,6 +26,36 @@ describe('the useBuilder(dependencies)(expression, options) module', () => {
     })
   })
 
+  describe('when the expression contains a $join operation', () => {
+
+    describe('and it is an object', () => {
+
+      it('returns a join statement', () => {
+        const result = builder({ $join: { type: 'left', table: 'test', on: 'a.id', equals: 'b.id' } })
+        expect(result).to.equals('LEFT JOIN `test` ON `a`.`id` = `b`.`id`')
+      })
+
+    })
+
+    describe('and it is an array', () => {
+
+      it('returns a join statement', () => {
+
+        const result = builder({
+          $join: [
+            { table: 'test_a', on: 'test_a.id', equals: 'test_c.id' },
+            { type: 'right', table: 'test_b', on: 'test_b.id', equals: 'test_b.id' },
+            { type: 'inner', table: 'test_c', on: 'test_c.id', equals: 'test_a.id' },
+          ],
+        })
+
+        expect(result).to.equals('INNER JOIN `test_a` ON `test_a`.`id` = `test_c`.`id` RIGHT JOIN `test_b` ON `test_b`.`id` = `test_b`.`id` INNER JOIN `test_c` ON `test_c`.`id` = `test_a`.`id`')
+      })
+
+    })
+
+  })
+
   describe('when the expression contains an $insert: { table, rows, columns? } operation', () => {
     it('returns an insert query', () => {
       const resultA = builder({ $insert: { table: 'admin', values: [{ id: 1, code: '123', name: 'Ounasbew Amainewb' }] } })
