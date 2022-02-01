@@ -1,55 +1,151 @@
+/* eslint-disable camelcase */
 
 import fs from 'fs'
 
 function parseBoolean(value) {
-  if (value === false || value === 'true' || value === 1) return true
-  if (value === false || value === 'false' || value === 0) return false
-  return value
+  if (['false', 'FALSE', '0'].includes(value)) return false
+  if (['true', 'TRUE', '1'].includes(value)) return true
+  return undefined
 }
 
 export default ({ $articles }) => ({
 
   async findMany(request) {
-    let { paginate, page, orderBy, sort, limit, offset, ...query } = request.query
-    let { search, active } = query
+    const query = {}, options = {}
 
-    query = {}
+    const paginate = parseBoolean(request.query.paginate)
 
     // Options
 
-    if (paginate) {
-      paginate = parseBoolean(paginate)
+    if (request.query.page) {
+      options.page = parseInt(request.query.page) || undefined
     }
-    if (page) {
-      page = parseInt(page)
+
+    if (request.query.order_by) {
+      const order_by = request.query.order_by
+
+      if (['code', 'name', 'active'].includes(order_by)) {
+        query.order_by = `article.${order_by}`
+      }
+
+      else if (order_by === 'section') {
+        query.order_by = 'section.name'
+      }
+
+      else if (order_by === 'category') {
+        query.order_by = 'category.name'
+      }
+
+      else if (order_by === 'attribute_name') {
+        query.order_by = 'attribute.name'
+      }
+
+      else if (order_by === 'attribute_value') {
+        query.order_by = 'attribute_value.name'
+      }
     }
-    if (limit) {
-      limit = parseInt(limit)
+
+    if (request.query.order) {
+      options.order = request.query.order
     }
-    if (offset) {
-      offset = parseInt(offset)
+
+    if (request.query.limit) {
+      options.limit = parseInt(request.query.limit) || undefined
+    }
+
+    if (request.query.offset) {
+      options.offset = parseInt(request.query.offset) || undefined
     }
 
     // Query
 
-    if (active) {
-      query.active = parseBoolean(active)
+    if (request.query.code) {
+      query['article.code'] = request.query.code
     }
-    if (search) {
+
+    if (request.query.name) {
+      query['article.name'] = request.query.name
+    }
+
+    if (request.query.active) {
+      query['article.active'] = parseBoolean(request.query.active)
+    }
+
+    if (request.query.category) {
+      query['category.name'] = request.query.category
+    }
+
+    if (request.query.section) {
+      query['section.name'] = request.query.section
+    }
+
+    if (request.query.attribute_name) {
+      query['attribute.name'] = request.query.attribute_name
+    }
+
+    if (request.query.attribute_value) {
+      query['attribute_value.name'] = request.query.attribute_value
+    }
+
+    if (request.query.search) {
+      const search = request.query.search
       query.$or = [
-        { code: search },
-        { name: { $like: search } },
-        { description: { $like: search } },
-        { shortDescription: { $like: search } },
+        { 'article.code': search },
+        { 'article.name': { $like: search } },
+        { 'article.description': { $like: search } },
+        { 'article.shortDescription': { $like: search } },
+        { 'category.name': { $like: search } },
+        { 'attribute.name': { $like: search } },
+        { 'attribute_value.name': { $like: search } },
       ]
     }
 
-    const result = paginate
-      ? await $articles.findPaginated(query, { page, orderBy, sort })
-      : await $articles.findMany(query, { limit, offset, orderBy, sort })
-
-    return result
+    return paginate
+      ? $articles.findPaginated(query, options)
+      : $articles.findMany(query, options)
   },
+
+  // async findMany(request) {
+  //   let { paginate, page, orderBy, sort, limit, offset, ...query } = request.query
+  //   let { search, active } = query
+
+  //   query = {}
+
+  //   // Options
+
+  //   if (paginate) {
+  //     paginate = parseBoolean(paginate)
+  //   }
+  //   if (page) {
+  //     page = parseInt(page)
+  //   }
+  //   if (limit) {
+  //     limit = parseInt(limit)
+  //   }
+  //   if (offset) {
+  //     offset = parseInt(offset)
+  //   }
+
+  //   // Query
+
+  //   if (active) {
+  //     query.active = parseBoolean(active)
+  //   }
+  //   if (search) {
+  //     query.$or = [
+  //       { code: search },
+  //       { name: { $like: search } },
+  //       { description: { $like: search } },
+  //       { shortDescription: { $like: search } },
+  //     ]
+  //   }
+
+  //   const result = paginate
+  //     ? await $articles.findPaginated(query, { page, orderBy, sort })
+  //     : await $articles.findMany(query, { limit, offset, orderBy, sort })
+
+  //   return result
+  // },
 
   async findOne(request) {
     const id = parseInt(request.params.id)
