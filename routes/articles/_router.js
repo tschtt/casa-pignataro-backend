@@ -5,11 +5,11 @@ import { useRouter } from '@packages/router'
 export default ({ endpoint }) => useRouter({
   '/:id': {
     get: endpoint.findOne,
-    patch: [ admin, upload.array('files'), endpoint.updateOne ],
+    patch: [ admin, upload.array('images'), endpoint.updateOne ],
     delete: [ admin, endpoint.removeOne ],
   },
   '/': {
     get: endpoint.findMany,
-    post: [ admin, upload.array('files'), endpoint.insertOne ],
+    post: [ admin, upload.array('images'), endpoint.insertOne ],
   },
 })

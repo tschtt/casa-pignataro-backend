@@ -79,8 +79,11 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
 
   async removeOne({ id }) {
     let result
-    result = $table.removeOne({ id })
+
+    await $attributes.removeMany({ fkArticle: id })
+    result = await $table.removeOne({ id })
     await $images.removeMany({ fkArticle: id })
+
     return result
   },
 

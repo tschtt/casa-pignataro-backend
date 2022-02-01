@@ -83,67 +83,39 @@ export default ({ $articles }) => ({
     return $articles.findOne({ id })
   },
 
-  // async insertOne(request) {
-  //   let item, id
-
-  //   item = request.body
-
-  //   item.id = 0
-  //   item.fkCategory = parseInt(item.fkCategory)
-  //   item.active = parseBoolean(item.active)
-  //   item.value = parseFloat(item.value)
-
-  //   item.images = request.files.map((file) => {
-  //     const path =  file.path.replace(/\\/g, '/')
-  //     const extension = file.originalname.split('.').pop()
-  //     fs.renameSync(path, `${path}.${extension}`)
-  //     return `${path}.${extension}`
-  //   })
-
-  //   id = await $articles.insertOne(item)
-
-  //   return $articles.findOne({ id })
-  // },
-
   async updateOne(request) {
+    let item, id
 
-    const id = parseInt(request.params.id)
-    const item = request.body
+    id = parseInt(request.params.id)
+
+    switch (request.headers['content-type'].split(';')[0]) {
+      case 'multipart/form-data':
+        item = JSON.parse(request.body.item)
+
+        if (!item.images) {
+          item.images = []
+        }
+
+        if (request.files) {
+          item.images.push(...request.files.map((file) => {
+            const path =  file.path.replace(/\\/g, '/')
+            const extension = file.originalname.split('.').pop()
+            fs.renameSync(path, `${path}.${extension}`)
+            return `${path}.${extension}`
+          }))
+        }
+
+        break
+      case 'application/json':
+        item = request.body
+        break
+      default:
+        throw new Error('content-type not supported')
+    }
 
     await $articles.updateOne({ id }, item)
 
     return $articles.findOne({ id })
-    // let item, id
-
-    // id = parseInt(request.params.id)
-
-    // item = request.body
-
-    // item.id = id
-    // item.fkCategory = parseInt(item.fkCategory)
-    // item.active = parseBoolean(item.active)
-    // item.value = parseFloat(item.value)
-
-    // if (!item.images) {
-    //   item.images = []
-    // }
-
-    // item.images = item.images.map((image) => {
-    //   return image.replace(`${process.env.APP_URL}/`, '')
-    // })
-
-    // if (request.files) {
-    //   item.images.push(...request.files.map((file) => {
-    //     const path =  file.path.replace(/\\/g, '/')
-    //     const extension = file.originalname.split('.').pop()
-    //     fs.renameSync(path, `${path}.${extension}`)
-    //     return `${path}.${extension}`
-    //   }))
-    // }
-
-    // await $articles.updateOne({ id }, item)
-
-    // return $articles.findOne({ id })
   },
 
   async removeOne(request) {
