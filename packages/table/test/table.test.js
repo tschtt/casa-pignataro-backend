@@ -127,51 +127,6 @@ describe('the useTable(dependencies)({ name }) module', () => {
     })
   })
 
-  describe('when the upsertOne(data, options) function is called', () => {
-    describe('and data.id truthy', () => {
-      it('updates the first row that matches its id with the data provided', async () => {
-        await table.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
-        checkQuery("UPDATE `test` SET `username` = 'peasd', `email` = 'arebw@amwn.omc' WHERE `id` LIKE 5 LIMIT 1")
-      })
-
-      describe('if a row was matched', () => {
-        it('returns its id', async () => {
-          connection.query.mock.returns = [{ affectedRows: 1 }]
-          const result = await table.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
-          expect(result).to.equals(5)
-        })
-      })
-
-      describe('if no row was matched', () => {
-        it('inserts the data to a new row', async () => {
-          connection.query.mock.returns = [{ affectedRows: 0 }]
-          await table.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
-          checkQuery("INSERT INTO `test` (`username`, `email`) VALUES ('peasd', 'arebw@amwn.omc')", { nth: 1 })
-        })
-
-        it('returns its id', async () => {
-          connection.query.mock.returns = [{ affectedRows: 0, insertId: 3 }]
-          const result = await table.upsertOne({ id: 5, username: 'peasd', email: 'arebw@amwn.omc' })
-          expect(result).to.equals(3)
-        })
-      })
-    })
-
-    describe('and data.id is falsy', () => {
-      it('inserts the data to a new row', async () => {
-        connection.query.mock.returns = [{ insertId: 10 }]
-        await table.upsertOne({ id: 0, username: 'peasd', email: 'arebw@amwn.omc' })
-        checkQuery("INSERT INTO `test` (`username`, `email`) VALUES ('peasd', 'arebw@amwn.omc')")
-      })
-
-      it('returns its result', async () => {
-        connection.query.mock.returns = [{ insertId: 10 }]
-        const result = await table.upsertOne({ id: 0, username: 'peasd', email: 'arebw@amwn.omc' })
-        expect(result).to.equals(10)
-      })
-    })
-  })
-
   describe('when the removeMany(query, options) function is called', () => {
     it('removes all matched rows from the table', async () => {
       await table.removeMany({ name: 'santi' })

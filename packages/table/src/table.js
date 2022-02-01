@@ -4,12 +4,8 @@ const PAGE_SIZE = parseInt(process.env.DATABASE_PAGE_SIZE)
 export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
-    // console.log('EXPRESSION: ', query)
     const sql = build(query)
-    console.log(sql)
-    console.log('')
     const result = await connection.query(sql)
-    // console.log('RESULT: ', result[0])
     return result[0]
   },
 
