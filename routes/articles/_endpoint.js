@@ -71,8 +71,16 @@ export default ({ $articles }) => ({
       query['article.active'] = parseBoolean(request.query.active)
     }
 
+    if (request.query.fkCategory) {
+      query['category.id'] = parseInt(request.query.fkCategory)
+    }
+
     if (request.query.category) {
       query['category.name'] = request.query.category
+    }
+
+    if (request.query.fkSection) {
+      query['section.id'] = parseInt(request.query.fkSection)
     }
 
     if (request.query.section) {
