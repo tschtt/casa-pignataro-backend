@@ -15,18 +15,35 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
     }
   },
 
-  async findMany(query, options) {
-    let items
-    items = await $table.findMany(query, options)
-    items = await $format.fillMany(items)
+  async findMany(query = {}, options = {}) {
+
+    options.join = [
+      { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
+      { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
+      { type: 'left', table: 'nn_article_attribute_value', on: 'article.id', equals: 'nn_article_attribute_value.fkArticle' },
+      { type: 'left', table: 'attribute_value', on: 'nn_article_attribute_value.fkAttributeValue', equals: 'attribute_value.id' },
+      { type: 'left', table: 'attribute', on: 'attribute_value.fkAttribute', equals: 'attribute.id' },
+    ]
+
+    const rows = await $table.findMany(query, options)
+    const items = await $format.fillMany(rows)
     return items
   },
 
-  async findOne(query) {
-    let item
-    item = await $table.findOne(query)
-    item = await $format.fillOne(item)
-    return item
+  async findOne(query = {}, options = {}) {
+
+    options.join = [
+      { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
+      { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
+      { type: 'left', table: 'nn_article_attribute_value', on: 'article.id', equals: 'nn_article_attribute_value.fkArticle' },
+      { type: 'left', table: 'attribute_value', on: 'nn_article_attribute_value.fkAttributeValue', equals: 'attribute_value.id' },
+      { type: 'left', table: 'attribute', on: 'attribute_value.fkAttribute', equals: 'attribute.id' },
+    ]
+
+    const rows = await $table.findMany(query, options)
+    const items = await $format.fillMany(rows)
+
+    return items[0]
   },
 
   async insertOne({ images, attributes, ...item }) {
@@ -34,7 +51,6 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
 
     $schema.validateOne(item)
 
-    item = await $format.cleanOne(item)
     id = await $table.insertOne(item)
 
     await $images.insertMany(images, { fkArticle: id })

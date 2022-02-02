@@ -95,6 +95,7 @@ export default ({ $articles }) => ({
         { 'article.description': { $like: search } },
         { 'article.shortDescription': { $like: search } },
         { 'category.name': { $like: search } },
+        { 'section.name': { $like: search } },
         { 'attribute.name': { $like: search } },
         { 'attribute_value.name': { $like: search } },
       ]
@@ -105,51 +106,9 @@ export default ({ $articles }) => ({
       : $articles.findMany(query, options)
   },
 
-  // async findMany(request) {
-  //   let { paginate, page, orderBy, sort, limit, offset, ...query } = request.query
-  //   let { search, active } = query
-
-  //   query = {}
-
-  //   // Options
-
-  //   if (paginate) {
-  //     paginate = parseBoolean(paginate)
-  //   }
-  //   if (page) {
-  //     page = parseInt(page)
-  //   }
-  //   if (limit) {
-  //     limit = parseInt(limit)
-  //   }
-  //   if (offset) {
-  //     offset = parseInt(offset)
-  //   }
-
-  //   // Query
-
-  //   if (active) {
-  //     query.active = parseBoolean(active)
-  //   }
-  //   if (search) {
-  //     query.$or = [
-  //       { code: search },
-  //       { name: { $like: search } },
-  //       { description: { $like: search } },
-  //       { shortDescription: { $like: search } },
-  //     ]
-  //   }
-
-  //   const result = paginate
-  //     ? await $articles.findPaginated(query, { page, orderBy, sort })
-  //     : await $articles.findMany(query, { limit, offset, orderBy, sort })
-
-  //   return result
-  // },
-
   async findOne(request) {
     const id = parseInt(request.params.id)
-    const item = await $articles.findOne({ id })
+    const item = await $articles.findOne({ 'article.id': id })
     return item
   },
 
@@ -176,7 +135,7 @@ export default ({ $articles }) => ({
 
     const id = await $articles.insertOne(item)
 
-    return $articles.findOne({ id })
+    return $articles.findOne({ 'article.id': id })
   },
 
   async updateOne(request) {
@@ -211,7 +170,7 @@ export default ({ $articles }) => ({
 
     await $articles.updateOne({ id }, item)
 
-    return $articles.findOne({ id })
+    return $articles.findOne({ 'article.id': id })
   },
 
   async removeOne(request) {
