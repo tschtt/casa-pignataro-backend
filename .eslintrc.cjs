@@ -37,5 +37,7 @@ module.exports = {
     'array-bracket-spacing': 'off',
     'prefer-const': 'off',
     'padded-blocks': 'off',
+    'camelcase': 'off',
+    'arrow-parens': 'off',
   },
 }
