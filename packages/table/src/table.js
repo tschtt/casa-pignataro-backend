@@ -49,6 +49,7 @@ export default ({ connection, builder: build }) => (table) => ({
         table,
         only: options.only,
       },
+      $join: options.join,
       $where: query,
       $order: {
         by: options.orderBy,
@@ -69,6 +70,7 @@ export default ({ connection, builder: build }) => (table) => ({
         table,
         only: options.only,
       },
+      $join: options.join,
       $where: query,
       $order: {
         by: options.orderBy,
