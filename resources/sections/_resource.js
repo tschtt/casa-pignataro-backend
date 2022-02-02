@@ -1,20 +1,28 @@
 
 export default ({ table, $categories, schema, format }) => ({
 
-  async findMany(query, options) {
-    let items
-    items = await table.findMany(query, options)
-    items = await format.fillMany(items)
-    return items
+  async findMany(query = {}, options = {}) {
+    options.join = [
+      { type: 'left', table: 'category', on: 'section.id', equals: 'category.fkSection' },
+      { type: 'left', table: 'attribute', on: 'category.id', equals: 'attribute.fkCategory' },
+      { type: 'left', table: 'attribute_value', on: 'attribute.id', equals: 'attribute_value.fkAttribute' },
+    ]
+
+    const rows = await table.findMany(query, options)
+
+    return format(rows)
   },
 
-  async findOne(query) {
-    let item
-    item = await table.findOne(query)
-    if (item) {
-      item = await format.fillOne(item)
-    }
-    return item
+  async findOne(query = {}, options = {}) {
+    options.join = [
+      { type: 'left', table: 'category', on: 'section.id', equals: 'category.fkSection' },
+      { type: 'left', table: 'attribute', on: 'category.id', equals: 'attribute.fkCategory' },
+      { type: 'left', table: 'attribute_value', on: 'attribute.id', equals: 'attribute_value.fkAttribute' },
+    ]
+
+    const rows = await table.findMany(query, options)
+
+    return format(rows)[0]
   },
 
   async insertOne({ categories = [], ...item } = {}) {
