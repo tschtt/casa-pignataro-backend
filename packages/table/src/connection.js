@@ -16,7 +16,6 @@ export default async ({ mysql }) => {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    nestTables: true,
   })
 
   console.log('Connected to the database')

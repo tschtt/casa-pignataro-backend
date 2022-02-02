@@ -5,7 +5,9 @@ export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
     const sql = build(query)
-    const result = await connection.query(sql)
+    const result = query.$join
+      ? await connection.query({ sql, nestTables: true })
+      : await connection.query(sql)
     return result[0]
   },
 
