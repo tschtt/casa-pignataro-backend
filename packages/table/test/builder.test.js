@@ -12,16 +12,48 @@ describe('the useBuilder(dependencies)(expression, options) module', () => {
     builder = useBuilder({ format })
   })
 
-  describe('when the expression contains a $select: { table, only? } operation', () => {
-    it('returns a select query', () => {
-      const result = builder({ $select: { table: 'admin' } })
-      expect(result).to.equals('SELECT * FROM `admin`')
+  describe('when the expression contains a $select: { table?, from?, as?, only?, count? } operation', () => {
+
+    describe('and it recibes a table string', () => {
+
+      it('returns a select query for it', () => {
+        const result = builder({ $select: { table: 'admin' } })
+        expect(result).to.equals('SELECT * FROM `admin`')
+      })
+
+    })
+
+    describe('and it recibes a from expression and an as value', () => {
+
+      it('returns a select query for it', () => {
+        const result = builder({
+          $select: {
+            from: {
+              $select: { table: 'article' },
+              $where: {
+                id: { $gt: 1 },
+              },
+            },
+            as: 'article',
+          },
+        })
+
+        expect(result).to.equals('SELECT * FROM (SELECT * FROM `article` WHERE `id` > 1) AS `article`')
+      })
+
     })
 
     describe('and it contains a only array', () => {
       it('selects only the specified columns', () => {
         const result = builder({ $select: { table: 'admin_session', only: ['id', 'active'] } })
         expect(result).to.equals('SELECT `id`, `active` FROM `admin_session`')
+      })
+    })
+
+    describe('and it contains a count array', () => {
+      it('counts the selected columns', () => {
+        const result = builder({ $select: { table: 'admin_session', count: 'id' } })
+        expect(result).to.equals('SELECT COUNT(`id`) FROM `admin_session`')
       })
     })
   })

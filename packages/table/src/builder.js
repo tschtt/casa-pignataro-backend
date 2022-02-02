@@ -14,15 +14,44 @@ export default ({ format }) => function build(expression, { isNot = false, joint
   const operators = {
 
     // Main operations
-    $select({ table, only, count }) {
-      if (count) {
-        state.add('SELECT COUNT(`id`) FROM ??', [table])
+    $select({ from, as, table, only, count }) {
+      let sql
+      let values
+
+      if (typeof count === 'boolean') {
+        count = 'id'
       }
-      else if (only) {
-        state.add('SELECT ?? FROM ??', [only, table])
-      } else {
-        state.add('SELECT * FROM ??', [table])
+
+      if (from && as) {
+        from = build(from)
+        sql = `SELECT * FROM (${from}) AS ??`
+        values = [as]
+
+        if (count) {
+          sql = `SELECT COUNT(??) FROM (${from})`
+          values = [count]
+        }
+        if (only) {
+          sql = `SELECT ?? FROM (${from})`
+          values = [only]
+        }
       }
+
+      if (table) {
+        sql = 'SELECT * FROM ??'
+        values = [table]
+
+        if (count) {
+          sql = 'SELECT COUNT(??) FROM ??'
+          values = [count, table]
+        }
+        if (only) {
+          sql = 'SELECT ?? FROM ??'
+          values = [only, table]
+        }
+      }
+
+      state.add(sql, values)
     },
     $insert({ table, value, values }) {
       if (values) {

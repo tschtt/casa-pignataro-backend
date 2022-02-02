@@ -5,6 +5,9 @@ export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
     const sql = build(query)
+    console.log('Nueva query:')
+    console.log(sql)
+    console.log('')
     const result = query.$join
       ? await connection.query({ sql, nestTables: true })
       : await connection.query(sql)
@@ -23,23 +26,59 @@ export default ({ connection, builder: build }) => (table) => ({
     return result[0]['COUNT(`id`)']
   },
 
-  async findPaginated(query, { page = 1, only, orderBy, sort } = {}) {
+  async findPaginated(query = {}, options = {}) {
+
+    options.page = options.page || 1
+
     const count = await this.count(query)
 
-    const items = await this.findMany(query, {
-      only,
-      orderBy,
-      sort,
-      limit: PAGE_SIZE,
-      offset: PAGE_SIZE * (page - 1),
-    })
+    let items
+
+    if (options.join) {
+      items = await this.query({
+        $select: {
+          from: {
+            $select: { table },
+            $where: query,
+            $limit: {
+              amount: PAGE_SIZE,
+              offset: PAGE_SIZE * (options.page - 1),
+            },
+          },
+          as: 'article',
+        },
+        $join: options.join,
+        $order: {
+          by: options.orderBy,
+          sort: options.sort,
+        },
+      })
+    }
+    else {
+      items = await this.query({
+        $select: {
+          table,
+          only: options.only,
+        },
+        $join: options.join,
+        $where: query,
+        $order: {
+          by: options.orderBy,
+          sort: options.sort,
+        },
+        $limit: {
+          amount: PAGE_SIZE,
+          offset: PAGE_SIZE * (options.page - 1),
+        },
+      })
+    }
 
     return {
       items,
       pagination: {
         item_count: count,
         page_first: 1,
-        page_current: page,
+        page_current: options.page,
         page_last: parseInt(count / PAGE_SIZE) + 1,
       },
     }
