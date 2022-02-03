@@ -60,7 +60,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
     return items[0] || {}
   },
 
-  async insertOne({ images, attributes, ...item }) {
+  async insertOne({ images, attributes, category, ...item }) {
     let id
 
     $schema.validateOne(item)
