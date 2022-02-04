@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable camelcase */
 import { TypeNotSupportedError } from './errors.js'
 
@@ -139,6 +140,9 @@ export default ({ format }) => function build(expression, { isNot = false, joint
         : state.add('?? IN (?)', [field, value])
     },
     $nin: ({ field, value }) => {
+      if (!value || !value.length) {
+        return
+      }
       if (typeof value[0] === 'object') {
         value = value.map((v) => v[field])
         value = value.filter((v) => v !== null && v !== undefined)

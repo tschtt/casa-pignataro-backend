@@ -4,7 +4,7 @@ import { useRouter } from '@packages/router'
 export default ({ endpoint }) => useRouter({
   '/:id': {
     get: endpoint.findOne,
-    put: [admin, endpoint.updateOne],
+    patch: [admin, endpoint.updateOne],
     delete: [ admin, endpoint.removeOne ],
   },
   '/': {

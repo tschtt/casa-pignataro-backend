@@ -1,5 +1,5 @@
 
-export default ({ table, schema, format }) => ({
+export default ({ table, schema, format, article_option }) => ({
 
   async findMany(query, options) {
     let items
@@ -61,7 +61,12 @@ export default ({ table, schema, format }) => ({
   },
 
   async removeMany(query) {
-    return table.removeMany(query)
+    const items = await table.findMany(query)
+    if (items.length) {
+      article_option.removeMany({ fkAttributeValue: { $in: items.map((item) => item.id) } })
+      return table.removeMany({ id: { $in: items } })
+    }
+    return 0
   },
 
 })
