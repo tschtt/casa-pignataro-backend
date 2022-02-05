@@ -12,6 +12,30 @@ describe('the useBuilder(dependencies)(expression, options) module', () => {
     builder = useBuilder({ format })
   })
 
+  it('Describe the functionality', () => {
+    const result = builder({
+      $select: {
+        from: {
+          $select: { table: 'article', only: ['article.id'] },
+          $join: [
+            { type: 'left', table: 'nn_article_attribute_value', on: 'nn_article_attribute_value.fkArticle', equals: 'article.id' },
+          ],
+          $group: 'article.id',
+        },
+        as: 'a',
+      },
+      $join: [
+        { type: 'left', table: 'article', on: 'a.id', equals: 'article.id' },
+        { type: 'left', table: 'nn_article_attribute_value', on: 'nn_article_attribute_value.fkArticle', equals: 'article.id' },
+      ],
+      $limit: {
+        amount: 4,
+      },
+    })
+
+    expect(result).to.equal('SELECT * FROM (SELECT `article`.`id` FROM `article` LEFT JOIN `nn_article_attribute_value` ON `nn_article_attribute_value`.`fkArticle` = `article`.`id` GROUP BY `article`.`id`) AS `a` LEFT JOIN `article` ON `a`.`id` = `article`.`id` LEFT JOIN `nn_article_attribute_value` ON `nn_article_attribute_value`.`fkArticle` = `article`.`id` LIMIT 4')
+  })
+
   describe('when the expression contains a $select: { table?, from?, as?, only?, count? } operation', () => {
 
     describe('and it recibes a table string', () => {

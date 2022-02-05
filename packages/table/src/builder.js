@@ -29,12 +29,12 @@ export default ({ format }) => function build(expression, { isNot = false, joint
         values = [as]
 
         if (count) {
-          sql = `SELECT COUNT(??) FROM (${from})`
-          values = [count]
+          sql = `SELECT COUNT(??) FROM (${from}) AS ??`
+          values = [count, as]
         }
         if (only) {
-          sql = `SELECT ?? FROM (${from})`
-          values = [only]
+          sql = `SELECT ?? FROM (${from}) AS ??`
+          values = [only, as]
         }
       }
 
@@ -203,6 +203,9 @@ export default ({ format }) => function build(expression, { isNot = false, joint
           }
         }
       }
+    },
+    $group(by) {
+      state.add('GROUP BY ??', [by])
     },
   }
 

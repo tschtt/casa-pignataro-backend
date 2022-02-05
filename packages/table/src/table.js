@@ -14,13 +14,18 @@ export default ({ connection, builder: build }) => (table) => ({
     return result[0]
   },
 
-  async count(query) {
+  async count(query, options) {
     const result = await this.query({
       $select: {
-        table,
+        from: {
+          $select: { table, only: [`${table}.id`] },
+          $join: options.join,
+          $where: query,
+          $group: `${table}.id`,
+        },
+        as: 't',
         count: true,
       },
-      $where: query,
     })
 
     return result[0]['COUNT(`id`)']
@@ -30,7 +35,7 @@ export default ({ connection, builder: build }) => (table) => ({
 
     options.page = options.page || 1
 
-    const count = await this.count(query)
+    const count = await this.count(query, options)
 
     let items
 
@@ -38,20 +43,25 @@ export default ({ connection, builder: build }) => (table) => ({
       items = await this.query({
         $select: {
           from: {
-            $select: { table },
+            $select: { table, only: [`${table}.id`] },
+            $join: options.join,
             $where: query,
+            $group: `${table}.id`,
+            $order: {
+              by: options.orderBy,
+              sort: options.sort,
+            },
             $limit: {
               amount: PAGE_SIZE,
               offset: PAGE_SIZE * (options.page - 1),
             },
           },
-          as: 'article',
+          as: 'table',
         },
-        $join: options.join,
-        $order: {
-          by: options.orderBy,
-          sort: options.sort,
-        },
+        $join: [
+          { type: 'left', table, on: 'table.id', equals: `${table}.id` },
+          ...options.join || [],
+        ],
       })
     }
     else {
@@ -79,28 +89,56 @@ export default ({ connection, builder: build }) => (table) => ({
         item_count: count,
         page_first: 1,
         page_current: options.page,
-        page_last: parseInt(count / PAGE_SIZE) + 1,
+        page_last: parseInt(count / PAGE_SIZE),
       },
     }
   },
 
   async findMany(query = {}, options = {}) {
-    const result = await this.query({
-      $select: {
-        table,
-        only: options.only,
-      },
-      $join: options.join,
-      $where: query,
-      $order: {
-        by: options.orderBy,
-        sort: options.sort,
-      },
-      $limit: {
-        amount: options.limit,
-        offset: options.offset,
-      },
-    })
+    let result
+
+    if (options.limit) {
+      result = await this.query({
+        $select: {
+          from: {
+            $select: { table, only: [`${table}.id`] },
+            $join: options.join,
+            $where: query,
+            $group: `${table}.id`,
+            $order: {
+              by: options.orderBy,
+              sort: options.sort,
+            },
+            $limit: {
+              amount: options.limit,
+              offset: options.offset,
+            },
+          },
+          as: 'table',
+        },
+        $join: [
+          { type: 'left', table, on: 'table.id', equals: `${table}.id` },
+          ...options.join || [],
+        ],
+      })
+    } else {
+      result = await this.query({
+        $select: {
+          table,
+          only: options.only,
+        },
+        $join: options.join,
+        $where: query,
+        $order: {
+          by: options.orderBy,
+          sort: options.sort,
+        },
+        $limit: {
+          amount: options.limit,
+          offset: options.offset,
+        },
+      })
+    }
 
     return result
   },

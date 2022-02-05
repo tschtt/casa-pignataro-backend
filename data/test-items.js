@@ -124,6 +124,21 @@ const values = [
   37699,
 ]
 
+const attributes = [
+  { name: 'Marca', value: 'Samsung' },
+  { name: 'Marca', value: 'Aiwa' },
+  { name: 'Marca', value: 'Apple' },
+  { name: 'Voltaje', value: '110V' },
+  { name: 'Voltaje', value: '220V' },
+  { name: 'Voltaje', value: '440V' },
+  { name: 'Potencia', value: '10W' },
+  { name: 'Potencia', value: '40W' },
+  { name: 'Potencia', value: '100W' },
+  { name: 'Puertas', value: '1' },
+  { name: 'Puertas', value: '2' },
+  { name: 'Puertas', value: '4' },
+]
+
 const images = fs.readdirSync('documents/images')/* .map((file) => `documents/images/${file}`) */
 
 fs.mkdirSync('data/temp')
@@ -137,10 +152,15 @@ await $articles.insertMany(fkCategories.map((fkCategory, index) => {
     description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus architecto est ullam quasi iusto dicta. Aperiam nihil nemo fugiat accusamus quia recusandae consequuntur? Eaque fugiat ipsa neque, deserunt sapiente perspiciatis.',
     shortDescription: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus architecto est ullam quasi iusto.',
     images: [],
+    attributes: [],
   }
 
   article.name = pickRandom(names)
   article.value = pickRandom(values)
+
+  article.attributes.push(pickRandom(attributes))
+  article.attributes.push(pickRandom(attributes))
+  article.attributes.push(pickRandom(attributes))
 
   article.images.push(pickRandom(images))
   article.images.push(pickRandom(images))

@@ -41,6 +41,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
 
     const rows = await $table.findMany(query, options)
     const items = await $format.fillMany(rows)
+
     return items
   },
 
