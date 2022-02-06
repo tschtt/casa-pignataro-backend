@@ -50,6 +50,7 @@ export default ({ connection, builder: build }) => (table) => ({
             $order: {
               by: options.orderBy,
               sort: options.sort,
+              by_2: `${table}.id`,
             },
             $limit: {
               amount: PAGE_SIZE,
@@ -76,6 +77,7 @@ export default ({ connection, builder: build }) => (table) => ({
         $order: {
           by: options.orderBy,
           sort: options.sort,
+          by_2: `${table}.id`,
         },
         $limit: {
           amount: PAGE_SIZE,
@@ -114,6 +116,7 @@ export default ({ connection, builder: build }) => (table) => ({
             $order: {
               by: options.orderBy,
               sort: options.sort,
+              by_2: `${table}.id`,
             },
             $limit: {
               amount: options.limit,
@@ -138,6 +141,7 @@ export default ({ connection, builder: build }) => (table) => ({
         $order: {
           by: options.orderBy,
           sort: options.sort,
+          by_2: `${table}.id`,
         },
         $limit: {
           amount: options.limit,
@@ -160,6 +164,7 @@ export default ({ connection, builder: build }) => (table) => ({
       $order: {
         by: options.orderBy,
         sort: options.sort,
+        by_2: `${table}.id`,
       },
       $limit: {
         amount: 1,

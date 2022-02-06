@@ -232,7 +232,7 @@ export default ({ format }) => function build(expression, { isNot = false, joint
         }
       }
     },
-    $order({ by, sort }) {
+    $order({ by, sort, by_2 }) {
       if (by) {
         state.add('ORDER BY ??', [by])
         if (sort) {
@@ -242,6 +242,9 @@ export default ({ format }) => function build(expression, { isNot = false, joint
           if (sort.toLowerCase() === 'desc') {
             state.add('DESC')
           }
+        }
+        if (by_2) {
+          state.add(', ??', [by_2])
         }
       }
     },

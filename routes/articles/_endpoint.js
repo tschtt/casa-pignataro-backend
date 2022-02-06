@@ -23,31 +23,31 @@ export default ({ $articles }) => ({
     }
 
     if (request.query.order_by) {
-      const order_by = request.query.order_by
+      const orderBy = request.query.order_by
 
-      if (['code', 'name', 'active'].includes(order_by)) {
-        query.order_by = `article.${order_by}`
+      if (['code', 'name', 'active', 'value'].includes(orderBy)) {
+        options.orderBy = `article.${orderBy}`
       }
 
-      else if (order_by === 'section') {
-        query.order_by = 'section.name'
+      else if (orderBy === 'section') {
+        options.orderBy = 'section.name'
       }
 
-      else if (order_by === 'category') {
-        query.order_by = 'category.name'
+      else if (orderBy === 'category') {
+        options.orderBy = 'category.name'
       }
 
-      else if (order_by === 'attribute_name') {
-        query.order_by = 'attribute.name'
+      else if (orderBy === 'attribute_name') {
+        options.orderBy = 'attribute.name'
       }
 
-      else if (order_by === 'attribute_value') {
-        query.order_by = 'attribute_value.name'
+      else if (orderBy === 'attribute_value') {
+        options.orderBy = 'attribute_value.name'
       }
     }
 
     if (request.query.order) {
-      options.order = request.query.order
+      options.sort = request.query.order
     }
 
     if (request.query.limit) {
@@ -66,6 +66,18 @@ export default ({ $articles }) => ({
 
     if (request.query.name) {
       query['article.name'] = request.query.name
+    }
+
+    if (request.query.minValue || request.query.maxValue) {
+      query['article.value'] = {}
+    }
+
+    if (request.query.minValue) {
+      query['article.value'].$gte = parseFloat(request.query.minValue) || undefined
+    }
+
+    if (request.query.maxValue) {
+      query['article.value'].$lte = parseFloat(request.query.maxValue) || undefined
     }
 
     if (request.query.active) {
@@ -109,6 +121,8 @@ export default ({ $articles }) => ({
         { 'attribute_value.name': { $like: search } },
       ]
     }
+
+    console.log(options)
 
     if (paginate) {
       return $articles.findPaginated(query, options)

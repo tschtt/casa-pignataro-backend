@@ -36,7 +36,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
 
     // results
 
-    const { items: rows, pagination } = await $table.findPaginated(query, options)
+    const rows = await $table.findMany(query, options)
 
     const items = $format(rows)
 
@@ -63,7 +63,16 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
 
     const rows_sections = await $table.query({
       $select: {
-        table: 'article',
+        from: {
+          $select: {
+            table: 'article',
+            only: ['article.id'],
+          },
+          $join: options.join,
+          $where: query,
+          $group: 'article.id',
+        },
+        as: 'temp',
         only: [
           'section.id',
           'section.name',
@@ -71,8 +80,11 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
         count: 'article.id',
         count_as: 'count',
       },
-      $join: options.join,
-      $where: query,
+      $join: [
+        { type: 'left', table: 'article', on: 'temp.id', equals: 'article.id' },
+        { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
+        { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
+      ],
       $group: 'section.id',
     })
 
@@ -83,7 +95,16 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
     } else {
       const rows_categories = await $table.query({
         $select: {
-          table: 'article',
+          from: {
+            $select: {
+              table: 'article',
+              only: ['article.id'],
+            },
+            $join: options.join,
+            $where: query,
+            $group: 'article.id',
+          },
+          as: 'temp',
           only: [
             'category.id',
             'category.name',
@@ -91,7 +112,11 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
           count: 'article.id',
           count_as: 'count',
         },
-        $join: options.join,
+        $join: [
+          { type: 'left', table: 'article', on: 'temp.id', equals: 'article.id' },
+          { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
+          { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
+        ],
         $where: query,
         $group: 'category.id',
       })
@@ -130,6 +155,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
             attribute.options.push({
               id: row.attribute_value.id,
               name: row.attribute_value.name,
+              count: row[''].count,
             })
             filters.attributes.push(attribute)
           } else {
@@ -146,7 +172,6 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
     return {
       items,
       filters,
-      pagination,
     }
   },
 
