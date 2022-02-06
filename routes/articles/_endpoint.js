@@ -14,6 +14,7 @@ export default ({ $articles }) => ({
     const query = {}, options = {}
 
     const paginate = parseBoolean(request.query.paginate)
+    const faceted = parseBoolean(request.query.faceted)
 
     // Options
 
@@ -109,9 +110,14 @@ export default ({ $articles }) => ({
       ]
     }
 
-    return paginate
-      ? $articles.findPaginated(query, options)
-      : $articles.findMany(query, options)
+    if (paginate) {
+      return $articles.findPaginated(query, options)
+    } if (faceted) {
+      query['article.active'] = true
+      return $articles.findFaceted(query, options)
+    }
+    return $articles.findMany(query, options)
+
   },
 
   async findOne(request) {

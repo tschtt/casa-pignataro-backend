@@ -56,6 +56,7 @@ export default ({ connection, builder: build }) => (table) => ({
               offset: PAGE_SIZE * (options.page - 1),
             },
           },
+          only: options.only,
           as: 'table',
         },
         $join: [
@@ -83,13 +84,18 @@ export default ({ connection, builder: build }) => (table) => ({
       })
     }
 
+    items = items.map(item => {
+      delete item.table
+      return item
+    })
+
     return {
       items,
       pagination: {
         item_count: count,
         page_first: 1,
         page_current: options.page,
-        page_last: parseInt(count / PAGE_SIZE),
+        page_last: Math.ceil(count / PAGE_SIZE),
       },
     }
   },

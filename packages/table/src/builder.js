@@ -15,7 +15,7 @@ export default ({ format }) => function build(expression, { isNot = false, joint
   const operators = {
 
     // Main operations
-    $select({ from, as, table, only, count }) {
+    $select({ from, as, table, only, count, count_as, min, max }) {
       let sql
       let values
 
@@ -31,10 +31,22 @@ export default ({ format }) => function build(expression, { isNot = false, joint
         if (count) {
           sql = `SELECT COUNT(??) FROM (${from}) AS ??`
           values = [count, as]
+          if (count_as) {
+            sql = `SELECT COUNT(??) ?? FROM (${from}) AS ??`
+            values = [count, count_as, as]
+          }
         }
         if (only) {
           sql = `SELECT ?? FROM (${from}) AS ??`
           values = [only, as]
+        }
+        if (only && count) {
+          sql = `SELECT ??, COUNT(??) FROM (${from}) AS ??`
+          values = [only, count, as]
+          if (count_as) {
+            sql = `SELECT ??, COUNT(??) ?? FROM (${from}) AS ??`
+            values = [only, count, count_as, as]
+          }
         }
       }
 
@@ -45,10 +57,39 @@ export default ({ format }) => function build(expression, { isNot = false, joint
         if (count) {
           sql = 'SELECT COUNT(??) FROM ??'
           values = [count, table]
+          if (count_as) {
+            sql = 'SELECT COUNT(??) ?? FROM ??'
+            values = [count, count_as, table]
+          }
         }
         if (only) {
           sql = 'SELECT ?? FROM ??'
           values = [only, table]
+        }
+        if (only && count) {
+          sql = 'SELECT ??, COUNT(??) FROM ??'
+          values = [only, count, table]
+
+          if (count_as) {
+            sql = 'SELECT ??, COUNT(??) ?? FROM ??'
+            values = [only, count, count_as, table]
+          }
+        }
+        if (min) {
+          sql = 'SELECT MIN(??) FROM ??'
+          values = [min, table]
+          if (max) {
+            sql = 'SELECT MIN(??), MAX(??) FROM ??'
+            values = [min, max, table]
+          }
+        }
+        if (max) {
+          sql = 'SELECT MAX(??) FROM ??'
+          values = [max, table]
+          if (min) {
+            sql = 'SELECT MAX(??), MIN(??) FROM ??'
+            values = [max, min, table]
+          }
         }
       }
 
