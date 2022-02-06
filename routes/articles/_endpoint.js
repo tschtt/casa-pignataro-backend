@@ -22,8 +22,8 @@ export default ({ $articles }) => ({
       options.page = parseInt(request.query.page) || undefined
     }
 
-    if (request.query.order_by) {
-      const orderBy = request.query.order_by
+    if (request.query.orderBy) {
+      const orderBy = request.query.orderBy
 
       if (['code', 'name', 'active', 'value'].includes(orderBy)) {
         options.orderBy = `article.${orderBy}`
