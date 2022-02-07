@@ -44,7 +44,7 @@ export default function useFormat({ $images }) {
         article.attributes = result.nn_article_attribute_value.filter(nn => nn.fkArticle === article.id)
         
         if(article.category) {
-          article.category.section = article.category.section.name
+          article.category.section = article.category.section?.name
         }
         if(article.attributes.length) {
           article.attributes = article.attributes.map(({ attribute_value }) => {

@@ -100,8 +100,16 @@ export default ({ $articles }) => ({
       query['section.name'] = request.query.section
     }
 
+    if (request.query.fkAttribute) {
+      query['attribute.id'] = request.query.fkAttribute
+    }
+
     if (request.query.attribute_name) {
       query['attribute.name'] = request.query.attribute_name
+    }
+
+    if (request.query.fkAttributeValue) {
+      query['attribute_value.id'] = request.query.fkAttributeValue
     }
 
     if (request.query.attribute_value) {

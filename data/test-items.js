@@ -8,6 +8,9 @@ await connection.query('SET FOREIGN_KEY_CHECKS = 0')
 await connection.query('TRUNCATE article')
 await connection.query('TRUNCATE section')
 await connection.query('TRUNCATE category')
+await connection.query('TRUNCATE attribute')
+await connection.query('TRUNCATE attribute_value')
+await connection.query('TRUNCATE nn_article_attribute_value')
 await connection.query('SET FOREIGN_KEY_CHECKS = 1')
 
 if (fs.existsSync('files')) {
@@ -77,7 +80,48 @@ await $sections.insertMany([
 ])
 
 const categories = await $categories.findMany()
-const fkCategories = categories.map((categorie) => categorie.id)
+const fkCategories = [
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+]
 
 const names = [
   'Heladera Gafa HGF387AF blanca con freezer 374L',
@@ -128,6 +172,7 @@ const attributes = [
   { name: 'Marca', value: 'Samsung' },
   { name: 'Marca', value: 'Aiwa' },
   { name: 'Marca', value: 'Apple' },
+  { name: 'Marca', value: 'Sony' },
   { name: 'Voltaje', value: '110V' },
   { name: 'Voltaje', value: '220V' },
   { name: 'Voltaje', value: '440V' },
@@ -143,7 +188,7 @@ const images = fs.readdirSync('documents/images')/* .map((file) => `documents/im
 
 fs.mkdirSync('data/temp')
 
-await $articles.insertMany(fkCategories.map((fkCategory, index) => {
+function generateArticle(fkCategory, index) {
   let article = {
     fkCategory,
     code: `ART-${index}`,
@@ -159,8 +204,8 @@ await $articles.insertMany(fkCategories.map((fkCategory, index) => {
   article.value = pickRandom(values)
 
   article.attributes.push(pickRandom(attributes))
-  article.attributes.push(pickRandom(attributes))
-  article.attributes.push(pickRandom(attributes))
+  // article.attributes.push(pickRandom(attributes))
+  // article.attributes.push(pickRandom(attributes))
 
   article.images.push(pickRandom(images))
   article.images.push(pickRandom(images))
@@ -172,7 +217,13 @@ await $articles.insertMany(fkCategories.map((fkCategory, index) => {
   })
 
   return article
-}))
+}
+
+const articles = fkCategories.map(generateArticle)
+
+for await (const article of articles) {
+  await $articles.insertOne(article)
+}
 
 fs.rmdirSync('data/temp')
 

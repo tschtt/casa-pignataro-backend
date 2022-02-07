@@ -19,6 +19,8 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
   },
 
   async findFaceted(query = {}, options = {}) {
+    console.log(query)
+
     options.join = [
       { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
       { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
@@ -139,14 +141,19 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
             count_as: 'count',
           },
           $join: options.join,
-          $where: query,
+          $where: {
+            ...query,
+            'category.id': categories?.[0]?.id,
+          },
           $group: 'attribute_value.id',
         })
 
-        filters.attributes = []
+        // filters.attributes = []
+
+        const attributes = []
 
         for (const row of rows_attributes) {
-          let attribute = filters.attributes.find(a => a.id === row.attribute.id)
+          let attribute = attributes.find(a => a.id === row.attribute.id)
           if (!attribute) {
             attribute = {}
             attribute.id = row.attribute.id
@@ -157,7 +164,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
               name: row.attribute_value.name,
               count: row[''].count,
             })
-            filters.attributes.push(attribute)
+            attributes.push(attribute)
           } else {
             attribute.options.push({
               id: row.attribute_value.id,
@@ -166,6 +173,8 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
             })
           }
         }
+
+        filters.attributes = attributes.filter(a => a.options.length > 1)
       }
     }
 
