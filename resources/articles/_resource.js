@@ -19,7 +19,6 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
   },
 
   async findFaceted(query = {}, options = {}) {
-    console.log(query)
 
     options.join = [
       { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
@@ -88,6 +87,9 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
         { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
         { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
       ],
+      $where: {
+        'section.active': true,
+      },
       $group: 'section.id',
     })
 
@@ -120,6 +122,9 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
           { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
           { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
         ],
+        $where: {
+          'category.active': true,
+        },
         $group: 'category.id',
       })
 
@@ -144,6 +149,8 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
           $where: {
             ...query,
             'category.id': categories?.[0]?.id,
+            'attribute.active': true,
+            'attribute_value.active': true,
           },
           $group: 'attribute_value.id',
         })
