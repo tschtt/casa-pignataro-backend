@@ -1,9 +1,21 @@
 /* eslint-disable default-param-last */
 
+function parseBoolean(value) {
+  if (['false', 'FALSE', '0'].includes(value)) return false
+  if (['true', 'TRUE', '1'].includes(value)) return true
+  return undefined
+}
+
 export default ({ resource }) => ({
 
-  async findMany() {
-    const items = await resource.findMany()
+  async findMany(request) {
+    const query = {}
+
+    if (request.query.active) {
+      query['section.active'] = parseBoolean(request.query.active)
+    }
+
+    const items = await resource.findMany(query)
     return items
   },
 

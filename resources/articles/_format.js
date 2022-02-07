@@ -26,6 +26,7 @@ export default function useFormat({ $images }) {
     }
 
     for (const article of result.article) {
+      article.active = !!article.active
       article.images = $images.findMany({ fkArticle: article.id })
     }
 

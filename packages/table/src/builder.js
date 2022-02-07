@@ -147,6 +147,35 @@ export default ({ format }) => function build(expression, { isNot = false, joint
       }
     },
 
+    $join_active(value) {
+      const parse_object = ({ type, table, on, equals }) => {
+        const parse_type = (value = '') => {
+          switch (value.toLowerCase()) {
+            case 'inner': return 'INNER'
+            case 'left':  return 'LEFT'
+            case 'right': return 'RIGHT'
+            case 'cross': return 'CROSS'
+            default: return 'INNER'
+          }
+        }
+
+        state.add(`${parse_type(type)} JOIN ?? ON ?? = ?? AND ?? = true`, [table, on, equals, `${table}.active`])
+      }
+
+      const parse_array = (joins = []) => {
+        joins.forEach(parse_object)
+      }
+
+      if (typeof value === 'object') {
+        if (Array.isArray(value)) {
+          parse_array(value)
+        } else {
+          parse_object(value)
+        }
+
+      }
+    },
+
     // Filter operations
     $where(expression = {}) {
       const result = build(expression, { joint: ' AND ' })

@@ -2,7 +2,7 @@
 export default ({ table, $categories, schema, format }) => ({
 
   async findMany(query = {}, options = {}) {
-    options.join = [
+    options.join_active = [
       { type: 'left', table: 'category', on: 'section.id', equals: 'category.fkSection' },
       { type: 'left', table: 'attribute', on: 'category.id', equals: 'attribute.fkCategory' },
       { type: 'left', table: 'attribute_value', on: 'attribute.id', equals: 'attribute_value.fkAttribute' },
@@ -14,7 +14,7 @@ export default ({ table, $categories, schema, format }) => ({
   },
 
   async findOne(query = {}, options = {}) {
-    options.join = [
+    options.join_active = [
       { type: 'left', table: 'category', on: 'section.id', equals: 'category.fkSection' },
       { type: 'left', table: 'attribute', on: 'category.id', equals: 'attribute.fkCategory' },
       { type: 'left', table: 'attribute_value', on: 'attribute.id', equals: 'attribute_value.fkAttribute' },
@@ -75,14 +75,14 @@ export default ({ table, $categories, schema, format }) => ({
 
   async removeOne({ id }) {
     await $categories.removeMany({ fkSection: id })
-    return table.removeOne({ id })
+    return table.updateOne({ id }, { active: false })
   },
 
   async removeMany(query) {
     const items = await table.findMany(query)
     if (items.length) {
       await $categories.removeMany({ fkSection: { $in: items.map((item) => item.id) } })
-      return table.removeMany({ id: { $in: items } })
+      return table.updateMany({ id: { $in: items } }, { active: false })
     }
     return 0
   },

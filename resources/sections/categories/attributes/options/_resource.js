@@ -57,14 +57,14 @@ export default ({ table, schema, format, article_option }) => ({
   },
 
   async removeOne(query) {
-    return table.removeOne(query)
+    return table.updateOne(query, { active: false })
   },
 
   async removeMany(query) {
     const items = await table.findMany(query)
     if (items.length) {
-      article_option.removeMany({ fkAttributeValue: { $in: items.map((item) => item.id) } })
-      return table.removeMany({ id: { $in: items } })
+      await article_option.removeMany({ fkAttributeValue: { $in: items.map((item) => item.id) } })
+      return table.updateMany({ id: { $in: items } }, { active: false })
     }
     return 0
   },

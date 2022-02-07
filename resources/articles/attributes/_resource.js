@@ -40,25 +40,31 @@ export default ({ $table, $attributes, $values, $schema, $format }) => ({
   },
 
   async insertMany(items = [], globals = {}) {
+    const result = []
+
     items = items.map((item) => ({ ...item, ...globals }))
-    items = items.map((item) => this.insertOne(item))
-    items = await Promise.all(items)
+
+    for await (const item of items) {
+      const resultItem = await this.insertOne(item)
+      result.push(resultItem)
+    }
+
     return items
   },
 
-  async updateOne({ fkArticle, fkCategory, name, value } = {}) {
-    const fkAttribute = await $attributes.upsertOne({ id: attribute.id, fkCategory }, { ...attribute, fkCategory })
-    const fkAttributeValue = await $values.upsertOne({ id: value.id, fkAttribute }, { ...value, fkAttribute })
-    const count = await $table.updateOne({ id, fkArticle, fkAttributeValue  })
-    return count
-  },
+  // async updateOne({ fkArticle, fkCategory, name, value } = {}) {
+  //   const fkAttribute = await $attributes.upsertOne({ id: attribute.id, fkCategory }, { ...attribute, fkCategory })
+  //   const fkAttributeValue = await $values.upsertOne({ id: value.id, fkAttribute }, { ...value, fkAttribute })
+  //   const count = await $table.updateOne({ id, fkArticle, fkAttributeValue  })
+  //   return count
+  // },
 
-  async updateMany(items = [], globals = {}) {
-    items = items.map((item) => ({ ...item, ...globals }))
-    items = items.map((item) => this.updateOne(item))
-    items = await Promise.all(items)
-    return items
-  },
+  // async updateMany(items = [], globals = {}) {
+  //   items = items.map((item) => ({ ...item, ...globals }))
+  //   items = items.map((item) => this.updateOne(item))
+  //   items = await Promise.all(items)
+  //   return items
+  // },
 
   async removeMany(query) {
     return $table.removeMany(query)

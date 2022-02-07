@@ -5,10 +5,8 @@ export default ({ connection, builder: build }) => (table) => ({
 
   async query(query = {}) {
     const sql = build(query)
-    console.log('Nueva query:')
     console.log(sql)
-    console.log('')
-    const result = query.$join
+    const result = query.$join || query.$join_active
       ? await connection.query({ sql, nestTables: true })
       : await connection.query(sql)
     return result[0]
@@ -137,6 +135,7 @@ export default ({ connection, builder: build }) => (table) => ({
           only: options.only,
         },
         $join: options.join,
+        $join_active: options.join_active,
         $where: query,
         $order: {
           by: options.orderBy,

@@ -121,6 +121,86 @@ const fkCategories = [
   ...categories.map((categorie) => categorie.id),
   ...categories.map((categorie) => categorie.id),
   ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
+  ...categories.map((categorie) => categorie.id),
 ]
 
 const names = [
@@ -219,11 +299,16 @@ function generateArticle(fkCategory, index) {
   return article
 }
 
-const articles = fkCategories.map(generateArticle)
+let articles
 
-for await (const article of articles) {
-  await $articles.insertOne(article)
-}
+articles = fkCategories.map(generateArticle)
+await $articles.insertMany(articles)
+
+// await Promise.all(articles)
+
+// for await (const article of articles) {
+//   await $articles.insertOne(article)
+// }
 
 fs.rmdirSync('data/temp')
 

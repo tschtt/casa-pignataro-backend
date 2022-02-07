@@ -231,9 +231,13 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
   },
 
   async insertMany(items = []) {
-    let result
-    result = items.map((item) => this.insertOne(item))
-    result = await Promise.all(result)
+    let result = []
+
+    for await (const item of items) {
+      const resultItem = await this.insertOne(item)
+      result.push(resultItem)
+    }
+
     return result
   },
 

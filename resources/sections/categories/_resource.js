@@ -65,14 +65,14 @@ export default ({ table, $attributes, schema, format }) => ({
 
   async removeOne({ id }) {
     await $attributes.removeMany({ fkCategory: id })
-    return table.removeOne({ id })
+    return table.updateOne({ id }, { active: false })
   },
 
   async removeMany(query) {
     const items = await table.findMany(query)
     if (items.length) {
       await $attributes.removeMany({ fkCategory: { $in: items.map((item) => item.id) } })
-      return table.removeMany({ id: { $in: items } })
+      return table.updateMany({ id: { $in: items } }, { active: false })
     }
     return 0
   },
