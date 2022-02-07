@@ -118,7 +118,6 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
           { type: 'left', table: 'category', on: 'article.fkCategory', equals: 'category.id' },
           { type: 'left', table: 'section', on: 'category.fkSection', equals: 'section.id' },
         ],
-        $where: query,
         $group: 'category.id',
       })
 
