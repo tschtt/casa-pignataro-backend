@@ -37,6 +37,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
     // results
 
     const rows = await $table.findMany(query, options)
+    const count = await $table.count(query, options)
 
     const items = $format(rows)
 
@@ -170,6 +171,7 @@ export default ({ $table, $schema, $format, $images, $attributes }) => ({
     }
 
     return {
+      count,
       items,
       filters,
     }

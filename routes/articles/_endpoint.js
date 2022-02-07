@@ -122,8 +122,6 @@ export default ({ $articles }) => ({
       ]
     }
 
-    console.log(options)
-
     if (paginate) {
       return $articles.findPaginated(query, options)
     } if (faceted) {
