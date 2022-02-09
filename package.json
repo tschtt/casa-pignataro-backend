@@ -9,6 +9,7 @@
     "start": "nodemon -r dotenv/config index.js",
     "lint": "eslint --ext \".js\" --ignore-path .gitignore .",
     "test:app": "mocha ./test/*/*",
+    "script": "node -r dotenv/config scripts/index.js",
     "test": "mocha"
   },
   "author": "Santiago Taschetta",
@@ -21,6 +22,7 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
+    "exceljs": "^4.3.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "*",
