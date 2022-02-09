@@ -39,15 +39,6 @@ function addSheet(workbook, name) {
   const column_no_wrap = {
     ...column_defaults,
     width: 50,
-    // style: {
-    //   ...column_defaults.style,
-    //   alignment: {
-    //     ...column_defaults.style.alignment,
-    //     // vertical: 'top',
-    //     // horizontal: 'left',
-    //     // wrapText: true,
-    //   },
-    // },
   }
 
   sheet.columns = [
@@ -72,6 +63,7 @@ function addRow(sheet, data) {
   row.font = { name: 'Arial', bold: false, size: 12 }
 
   row.getCell(2).font = { name: 'Arial', bold: true, size: 14 }
+  row.getCell(7).alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
   row.getCell(8).alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
   row.getCell(9).alignment = { vertical: 'top', horizontal: 'left', wrapText: false }
   row.getCell(10).alignment = { vertical: 'top', horizontal: 'left', wrapText: false }
@@ -105,20 +97,35 @@ async function query(sql, values) {
   return result
 }
 
-function format({ section: sections, category: categories, article: articles }) {
-  for (const article of articles) {
-    const category = categories.find(category => category.id === article.fkCategory)
+function format(rows) {
+
+  rows.nn = [...rows.nn, ...rows.nn]
+
+  for (const nn of rows.nn) {
+    const value = rows.value.find(value => value.id === nn.fkAttributeValue)
+    const attribute = rows.attribute.find(attribute => attribute.id === value.fkAttribute)
+
+    nn.name = attribute.name
+    nn.value = value.name
+
+    // rows.nn.push(nn)
+  }
+
+  for (const article of rows.article) {
+    const category = rows.category.find(category => category.id === article.fkCategory)
+    const attributes = rows.nn.filter(attribute => attribute.fkArticle === article.id)
 
     article.active = article.active ? 'SI' : 'NO'
     article.category = category.name
     article.fkSection = category.fkSection
+    article.attributes = attributes.map(a => `${a.name}: ${a.value}`).join('\n')
   }
 
-  for (const section of sections) {
-    section.articles = articles.filter(article => article.fkSection === section.id)
+  for (const section of rows.section) {
+    section.articles = rows.article.filter(article => article.fkSection === section.id)
   }
 
-  return sections
+  return rows.section
 }
 
 export default async function generateExcel() {
