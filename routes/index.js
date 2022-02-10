@@ -6,8 +6,10 @@ import articles from './articles/index.js'
 import contact from './contact/index.js'
 import session from './session/index.js'
 import sections from './sections/index.js'
+import xlsx from './xlsx/index.js'
 
 export default useApp({
+  '/xlsx': xlsx,
   '/admins': admins,
   '/articles': articles,
   '/contact': contact,
