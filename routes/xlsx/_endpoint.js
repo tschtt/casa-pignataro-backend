@@ -1,12 +1,13 @@
-import ExcelJS from 'exceljs'
+/* eslint-disable */
+import Excel from 'exceljs'
 import fs from 'fs'
 
 export default function useEndpoint({ connection }) {
 
-  // ExcelJS Helpers
+  // Excel Helpers
 
   function createWorkbook() {
-    const workbook = new ExcelJS.Workbook()
+    const workbook = new Excel.Workbook()
 
     workbook.creator = 'Casa Pignataro'
     workbook.created = new Date(Date.now())
@@ -129,7 +130,57 @@ export default function useEndpoint({ connection }) {
   }
 
   return {
-    import(request, response) {
+    async import(request) {
+      const workbook = new Excel.Workbook()
+
+      await workbook.xlsx.readFile(request.file.path)
+
+      // get data from workbook
+
+      const sections = []
+
+      workbook.eachSheet((sheet) => {
+        const section = {}
+
+        section.name = sheet.name
+        section.articles = []
+
+        // validate the sheet
+        
+        const header = sheet.getRow(1)
+        const header_schema = [, 'ID', 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion Breve', 'Descripcion', 'Imagenes']
+
+        for (let i = 1; i < header_schema.length; i++) {
+          if (header.getCell(i).value !== header_schema[i]) {
+            throw new Error('Documento Invalido')
+          }
+        }
+
+        sheet.eachRow((row, n) => {
+          if(n === 1) return
+          section.articles.push({
+            id: row.values[1],
+            category: row.values[2],
+            active: row.values[3],
+            code: row.values[4],
+            name: row.values[5],
+            value: row.values[6],
+            attributes: row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1]})),
+            shortDescription: row.values[8],
+            description: row.values[9],
+            images: row.values[10]?.split('\n') || [],
+          })
+        })
+
+
+        sections.push(section)
+      })
+
+      fs.writeFileSync('data.json', JSON.stringify(sections, null, 2))
+      
+      return {
+        success: true,
+      }
     },
     async export(request, response) {
       const workbook = createWorkbook()
