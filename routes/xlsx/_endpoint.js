@@ -143,13 +143,6 @@ export default function useEndpoint({ connection }) {
   return {
     async import(request) {
       const workbook = new Excel.Workbook()
-
-      let sections = []
-      let categories = []
-      let attributes = []
-      let values = []
-      let articles = []
-      let article_values = []
       
       function validateSheet(sheet) {
         const header = sheet.getRow(1)
@@ -163,52 +156,45 @@ export default function useEndpoint({ connection }) {
       }
 
       async function updateSections(sections) {
-        // get section names
-        const names = sections.map(s => s.name)
-        
-        // remove not in names
-        await query(`update section set active = false where name not in (?)`, [names])
-        
-        // find existing items
-        const existing = await query(`select * from section where name in (?)`, [names])
+        let rows
 
-        // format data for upsert
-        const data = sections.map(({ name }) => {
-          const { id = 0 } = existing.find(section => section.name === name) || {}
-          return [id, name]
-        })
-
+        // find rows
+        rows = await query(`select * from section where name in (?)`, [sections.map(s => s.name)])
+        
+        // remove the rest
+        await query(`update section set active = false where id not in (?)`, [rows.map(r => r.id)])
+        
         // upsert sections
-        await query(`insert into section (id, name) values ? on duplicate key update active = true`, [data])
+        await query(`insert into section (id, name) values ? on duplicate key update active = true`, [
+          sections.map(({ name }) => {
+            const { id = 0 } = rows.find(row => row.name === name) || {}
+            return [id, name]
+          })
+        ])
 
         // get active rows
-        const rows = await query('select * from section where active = true')
+        rows = await query('select * from section where active = true')
 
         // format the sections and the section's categories
-        return sections.map(({ name, categories }) => {
+        return sections.map(({ fid, name }) => {
           const { id } = rows.find(s => s.name === name)
-          categories = categories.map(c => ({ fkSection: id, name: c.name }))
-          return {
-            id,
-            name,
-            categories,
-          }
+          return { id, fid, name }
         })
       }
 
-      async function updateCategories(sections) {
+      async function updateCategories(categories, { sections }) {
         let rows 
-        
-        const categories = sections.map(s => s.categories).reduce((result, append) => [...result, ...append], [])
-        const filters = sections.map(s => [s.id, s.categories.map(c => c.name)])
         
         // find rows
         rows = await query(`
           select * from category
           where id in (
             select id from category where (${
-              filters.map(([fkSection, names]) =>
-                format(`(fkSection = ? and name in (?))`, [fkSection, names])
+              sections.map(section =>
+                format(`(fkSection = ? and name in (?))`, [
+                  section.id, 
+                  categories.filter(c => c.fidSection === section.fid).map(c => c.name)
+                ])
               ).join('or')
             })
           )
@@ -221,8 +207,9 @@ export default function useEndpoint({ connection }) {
 
         // upsert sections
         await query(`insert into category (id, fkSection, name) values ? on duplicate key update active = true`, [
-          categories.map(({ fkSection, name }) => {
+          categories.map(({ fidSection, name }) => {
             const { id = 0 } = rows.find(row => row.name === name) || {}
+            const { id: fkSection } = sections.find(s => s.fid === fidSection)
             return [id, fkSection, name]
           })
         ])
@@ -231,7 +218,8 @@ export default function useEndpoint({ connection }) {
         rows = await query('select * from category where active = true')
         
         // format the sections and the section's categories
-        return categories.map(({ fkSection, name }) => {
+        return categories.map(({ fidSection, name }) => {
+          const { id: fkSection } = sections.find(s => s.fid === fidSection)
           const { id } = rows.find(r => r.name === name && r.fkSection === fkSection)
           return { id, fkSection, name }
         })
@@ -239,35 +227,42 @@ export default function useEndpoint({ connection }) {
 
       await workbook.xlsx.readFile(request.file.path)
       
+      let sections = []
+      let categories = [{ fidSection: 0, name: 'Categoria de prueba' }]
+      let attributes = []
+      let values = []
+      let articles = []
+      let article_values = []
+      
       workbook.eachSheet((sheet) => {
         validateSheet(sheet)
         
-        const section = {}
-
-        section.name = sheet.name
-        section.categories = []
+        let section = sections.find(s => s.name === sheet.name)
+        if(!section) {
+          section = { fid: sections.length, name: sheet.name }
+          sections.push(section)
+        }
                 
         sheet.eachRow((row, n) => {
           if(n === 1) return
           
-          const category = row.values[2]
-          if(!section.categories.find(c => c.name === category)) {
-            section.categories.push({ name: category })
+          const category_name = row.values[2]
+          
+          let category = categories.find(c => c.name === category_name)
+          if(!category) {
+            category = { fid: categories.length, fidSection: section.fid, name: category_name }
+            categories.push(category)
           }
 
         })
-
-        sections.push(section)
       })
 
-      console.log(connection.getConnection)
-      
       try {
         await query('START TRANSACTION')
   
         sections = await updateSections(sections)
         
-        categories = await updateCategories(sections)
+        categories = await updateCategories(categories, { sections })
 
         await query('COMMIT')
   
