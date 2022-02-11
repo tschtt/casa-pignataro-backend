@@ -1,4 +1,8 @@
-/* eslint-disable */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-sparse-arrays */
+/* eslint-disable no-unneeded-ternary */
+/* eslint-disable implicit-arrow-linebreak */
+/* eslint-disable indent */
 import Excel from 'exceljs'
 import fs from 'fs'
 
@@ -143,37 +147,37 @@ export default function useEndpoint({ connection }) {
   return {
     async import(request) {
       const workbook = new Excel.Workbook()
-      
+
       function validateSheet(sheet) {
         const header = sheet.getRow(1)
         const header_schema = [, 'ID', 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion Breve', 'Descripcion', 'Imagenes']
 
         for (let i = 1; i < header_schema.length; i++) {
           if (header.getCell(i).value !== header_schema[i]) {
-            throw new Error('Documento Invalido')
+            console.log(header.getCell(i).value)
+            console.log(header_schema[i])
+            throw new Error('El documento no cuenta con el formato requerido')
           }
         }
       }
 
       async function updateSections(sections) {
-        let rows
-
-        // find rows
-        rows = await query(`select * from section where name in (?)`, [sections.map(s => s.name)])
-        
         // remove the rest
-        await query(`update section set active = false where id not in (?)`, [rows.map(r => r.id)])
-        
+        await query('update section set active = false')
+
+        // find rows for update
+        const rows_update = await query('select * from section where name in (?)', [sections.map(s => s.name)])
+
         // upsert sections
-        await query(`insert into section (id, name) values ? on duplicate key update active = true`, [
+        await query('insert into section (id, name) values ? on duplicate key update active = true', [
           sections.map(({ name }) => {
-            const { id = 0 } = rows.find(row => row.name === name) || {}
+            const { id = 0 } = rows_update.find(s => s.name === name) || {}
             return [id, name]
-          })
+          }),
         ])
 
         // get active rows
-        rows = await query('select * from section where active = true')
+        const rows = await query('select * from section where active = true')
 
         // format the sections and the section's categories
         return sections.map(({ fid, name }) => {
@@ -183,75 +187,245 @@ export default function useEndpoint({ connection }) {
       }
 
       async function updateCategories(categories, { sections }) {
-        let rows 
-        
-        // find rows
-        rows = await query(`
+        await query('update category set active = false')
+
+        // find rows to update
+        const rows_update = await query(`
           select * from category
           where id in (
             select id from category where (${
               sections.map(section =>
-                format(`(fkSection = ? and name in (?))`, [
-                  section.id, 
-                  categories.filter(c => c.fidSection === section.fid).map(c => c.name)
-                ])
-              ).join('or')
+                format('(fkSection = ? and name in (?))', [
+                  section.id,
+                  categories.filter(c => c.ffkSection === section.fid).map(c => c.name),
+                ])).join('or')
             })
           )
         `)
 
-        // remove the rest
-        await query(`update category set active = false where id not in (?)`, [
-          rows.map(r => r.id)
-        ])
-
         // upsert sections
-        await query(`insert into category (id, fkSection, name) values ? on duplicate key update active = true`, [
-          categories.map(({ fidSection, name }) => {
-            const { id = 0 } = rows.find(row => row.name === name) || {}
-            const { id: fkSection } = sections.find(s => s.fid === fidSection)
+        await query('insert into category (id, fkSection, name) values ? on duplicate key update active = true', [
+          categories.map(({ ffkSection, name }) => {
+            const { id: fkSection } = sections.find(s => s.fid === ffkSection)
+            const { id = 0 } = rows_update.find(row => row.name === name && row.fkSection === fkSection) || {}
             return [id, fkSection, name]
-          })
+          }),
         ])
 
         // get active rows
-        rows = await query('select * from category where active = true')
-        
+        const rows = await query('select * from category where active = true')
+
         // format the sections and the section's categories
-        return categories.map(({ fidSection, name }) => {
-          const { id: fkSection } = sections.find(s => s.fid === fidSection)
+        return categories.map(({ fid, ffkSection, name }) => {
+          const { id: fkSection } = sections.find(s => s.fid === ffkSection)
           const { id } = rows.find(r => r.name === name && r.fkSection === fkSection)
-          return { id, fkSection, name }
+          return { id, fid, fkSection, name }
+        })
+      }
+
+      async function updateArticles(articles, { categories }) {
+        await query('update article set active = false')
+
+        // find rows to update
+        const rows_update = await query('select * from article where code in (?)', [
+          articles.map(a => a.code),
+        ])
+
+        // upsert sections
+        await query('insert into article (id, active, code, name, value, description, shortDescription, fkCategory) values ? on duplicate key update active = true', [
+          articles.map(({ active, code, name, value, description, shortDescription, ffkCategory }) => {
+            const { id = 0 } = rows_update.find(row => row.code === code) || {}
+            const { id: fkCategory } = categories.find(c => c.fid === ffkCategory)
+            return [id, active, code, name, value, description, shortDescription, fkCategory]
+          }),
+        ])
+
+        // get active rows
+        const rows = await query('select * from article where active = true')
+
+        // format the sections and the section's categories
+        return articles.map(({ fid, active, code, name, value, description, shortDescription, ffkCategory }) => {
+          const { id = 0, fkCategory } = rows.find(row => row.code === code) || {}
+          return { id, fid, active, code, name, value, description, shortDescription, fkCategory, ffkCategory }
+        })
+      }
+
+      async function updateAttributes(attributes, { categories }) {
+        await query('update attribute set active = false')
+
+        // find rows to update
+        const rows_update = await query(`
+          select * from attribute
+          where id in (
+            select id from attribute where (${
+              categories.map(category =>
+                format('(fkCategory = ? and name in (?))', [
+                  category.id,
+                  attributes.filter(a => a.ffkCategory === category.fid).map(a => a.name),
+                ])).join('or')
+            })
+          )
+        `)
+
+        // upsert sections
+        await query('insert into attribute (id, name, fkCategory) values ? on duplicate key update active = true', [
+          attributes.map(({ name, ffkCategory }) => {
+            const { id: fkCategory } = categories.find(c => c.fid === ffkCategory)
+            const { id = 0 } = rows_update.find(row => row.name === name && row.fkCategory === fkCategory) || {}
+            return [id, name, fkCategory]
+          }),
+        ])
+
+        // get active rows
+        const rows = await query('select * from attribute where active = true')
+
+        // format the sections and the section's categories
+        return attributes.map(({ fid, ffkCategory, name }) => {
+          const { id: fkCategory } = categories.find(c => c.fid === ffkCategory)
+          const { id } = rows.find(r => r.name === name && r.fkCategory === fkCategory)
+          return { id, fid, fkCategory, name }
+        })
+      }
+
+      async function updateAttributeValues(values, { attributes }) {
+        await query('update attribute_value set active = false')
+
+        // find rows to update
+        const rows_update = await query(`
+          select * from attribute_value
+          where id in (
+            select id from attribute_value where (${
+              attributes.map(attribute =>
+                format('(fkAttribute = ? and name in (?))', [
+                  attribute.id,
+                  values.filter(v => v.ffkAttribute === attribute.fid).map(a => a.name),
+                ])).join('or')
+            })
+          )
+        `)
+
+        // upsert sections
+        await query('insert into attribute_value (id, name, fkAttribute) values ? on duplicate key update active = true', [
+          values.map(({ name, ffkAttribute }) => {
+            const { id: fkAttribute } = attributes.find(a => a.fid === ffkAttribute)
+            const { id = 0 } = rows_update.find(row => row.name === name && row.fkAttribute === fkAttribute) || {}
+            return [id, name, fkAttribute]
+          }),
+        ])
+
+        // get active rows
+        const rows = await query('select * from attribute_value where active = true')
+
+        // format the sections and the section's attributes
+        return values.map(({ fid, ffkAttribute, name }) => {
+          const { id: fkAttribute } = attributes.find(a => a.fid === ffkAttribute)
+          const { id } = rows.find(r => r.name === name && r.fkAttribute === fkAttribute)
+          return { id, fid, fkAttribute, name }
+        })
+      }
+
+      async function updateArticleValues(article_values, { articles, values }) {
+
+        article_values = article_values.map(av => {
+          return {
+            fid: av.fid,
+            fkArticle: articles.find(a => a.fid === av.ffkArticle).id,
+            fkAttributeValue: values.find(v => v.fid === av.ffkAttributeValue).id,
+          }
+        })
+
+        await query('update nn_article_attribute_value set active = false')
+
+        // find rows to update
+        const rows_update = await query(`
+          select * from nn_article_attribute_value
+          where (${
+            article_values.map(av => {
+              return format('(fkAttributeValue = ? and fkArticle = ?)', [av.fkAttributeValue, av.fkArticle])
+            }).join('or')
+          })
+        `)
+
+        // upsert sections
+        await query('insert into nn_article_attribute_value (id, fkAttributeValue, fkArticle) values ? on duplicate key update active = true', [
+          article_values.map(({ fkArticle, fkAttributeValue }) => {
+            const { id = 0 } = rows_update.find(row => row.fkAttributeValue === fkAttributeValue && row.fkArticle === fkArticle) || {}
+            return [id, fkAttributeValue, fkArticle]
+          }),
+        ])
+
+        // get active rows
+        const rows = await query('select * from nn_article_attribute_value where active = true')
+
+        // format the sections and the section's values
+        return article_values.map(({ fid, fkArticle, fkAttributeValue }) => {
+          const { id = 0 } = rows.find(row => row.fkAttributeValue === fkAttributeValue && row.fkArticle === fkArticle) || {}
+          return { id, fid, fkAttributeValue, fkArticle }
         })
       }
 
       await workbook.xlsx.readFile(request.file.path)
-      
+
       let sections = []
-      let categories = [{ fidSection: 0, name: 'Categoria de prueba' }]
+      let categories = []
       let attributes = []
       let values = []
       let articles = []
       let article_values = []
-      
+      let article_images = []
+
       workbook.eachSheet((sheet) => {
         validateSheet(sheet)
-        
+
         let section = sections.find(s => s.name === sheet.name)
-        if(!section) {
-          section = { fid: sections.length, name: sheet.name }
+        if (!section) {
+          section = { fid: sections.length + 1, name: sheet.name }
           sections.push(section)
         }
-                
+
         sheet.eachRow((row, n) => {
-          if(n === 1) return
-          
-          const category_name = row.values[2]
-          
-          let category = categories.find(c => c.name === category_name)
-          if(!category) {
-            category = { fid: categories.length, fidSection: section.fid, name: category_name }
+          if (n === 1) return
+
+          const row_category = row.values[2]
+          const row_attributes = row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1] || 'SI' }))
+
+          let category = categories.find(c => c.name === row_category && c.ffkSection === section.fid)
+          if (!category) {
+            category = { fid: categories.length + 1, ffkSection: section.fid, name: row_category }
             categories.push(category)
+          }
+
+          let article = {
+            id: row.values[1],
+            fid: articles.length + 1,
+            ffkCategory: category.fid,
+            active: (row.values[3]).toLowerCase() === 'si' ? true : false,
+            code: row.values[4],
+            name: row.values[5],
+            value: parseFloat(row.values[6]),
+            shortDescription: row.values[8],
+            description: row.values[9],
+          }
+          articles.push(article)
+
+          for (const row_attribute of row_attributes) {
+            let attribute = attributes.find(a => a.name === row_attribute.name && a.ffkCategory === category.fid)
+            if (!attribute) {
+              attribute = { fid: attributes.length + 1, ffkCategory: category.fid, name: row_attribute.name }
+              attributes.push(attribute)
+            }
+
+            let value = values.find(v => v.name === row_attribute.value && v.ffkAttribute === attribute.fid)
+            if (!value) {
+              value = { fid: values.length + 1, ffkAttribute: attribute.fid, name: row_attribute.value }
+              values.push(value)
+            }
+
+            let article_value = article_values.find(av => av.ffkArticle === article.fid && av.ffkAttributeValue === value.fid)
+            if (!article_value) {
+              article_value = { fid: article_values.length + 1, ffkArticle: article.fid, ffkAttributeValue: value.fid }
+              article_values.push(article_value)
+            }
           }
 
         })
@@ -259,41 +433,29 @@ export default function useEndpoint({ connection }) {
 
       try {
         await query('START TRANSACTION')
-  
+
         sections = await updateSections(sections)
-        
         categories = await updateCategories(categories, { sections })
+        articles = await updateArticles(articles, { categories })
+        attributes = await updateAttributes(attributes, { categories })
+        values = await updateAttributeValues(values, { attributes })
+        article_values = await updateArticleValues(article_values, { articles, values })
 
         await query('COMMIT')
-  
+
         return {
           sections,
-          categories
-        }        
+          categories,
+          articles,
+          attributes,
+          values,
+          article_values,
+        }
       } catch (error) {
         await query('ROLLBACK')
         throw error
       }
     },
-    // sheet.eachRow((row, n) => {
-    //   if(n === 1) return
-    //   const category = {}
-
-    //   category
-      
-    //   section.articles.push({
-    //     id: row.values[1],
-    //     category: row.values[2],
-    //     active: row.values[3],
-    //     code: row.values[4],
-    //     name: row.values[5],
-    //     value: row.values[6],
-    //     attributes: row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1]})),
-    //     shortDescription: row.values[8],
-    //     description: row.values[9],
-    //     images: row.values[10]?.split('\n') || [],
-    //   })
-    // })
     async export(request, response) {
       const workbook = createWorkbook()
 
