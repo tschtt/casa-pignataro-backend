@@ -74,7 +74,6 @@ export default function useEndpoint({ connection }) {
     }
 
     sheet.columns = [
-      { ...column_defaults, header: 'ID', key: 'id', hidden: true },
       { ...column_defaults, header: 'Categoría', key: 'category' },
       { ...column_defaults, header: 'Activo', key: 'active' },
       { ...column_defaults, header: 'Codigo', key: 'code' },
@@ -94,11 +93,11 @@ export default function useEndpoint({ connection }) {
 
     row.font = { name: 'Arial', bold: false, size: 12 }
 
-    row.getCell(2).font = { name: 'Arial', bold: true, size: 14 }
+    row.getCell(1).font = { name: 'Arial', bold: true, size: 14 }
+    row.getCell(6).alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
     row.getCell(7).alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
     row.getCell(8).alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
-    row.getCell(9).alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
-    row.getCell(10).alignment = { vertical: 'top', horizontal: 'left', wrapText: false }
+    row.getCell(9).alignment = { vertical: 'top', horizontal: 'left', wrapText: false }
 
     return row
   }
@@ -175,7 +174,7 @@ export default function useEndpoint({ connection }) {
 
       function validateSheet(sheet) {
         const header = sheet.getRow(1)
-        const header_schema = [, 'ID', 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion Breve', 'Descripcion', 'Imagenes']
+        const header_schema = [, 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion Breve', 'Descripcion', 'Imagenes']
 
         for (let i = 1; i < header_schema.length; i++) {
           if (header.getCell(i).value !== header_schema[i]) {
@@ -491,20 +490,19 @@ export default function useEndpoint({ connection }) {
           }
 
           let article = {
-            id: row.values[1],
             fid: articles.length + 1,
             ffkCategory: category.fid,
-            active: (row.values[3]).toLowerCase() === 'si' ? true : false,
-            code: row.values[4],
-            name: row.values[5],
-            value: parseFloat(row.values[6]),
-            shortDescription: row.values[8],
-            description: row.values[9],
+            active: (row.values[2]).toLowerCase() === 'si' ? true : false,
+            code: row.values[3],
+            name: row.values[4],
+            value: parseFloat(row.values[5]),
+            shortDescription: row.values[7],
+            description: row.values[8],
           }
           articles.push(article)
 
-          if (row.values[10]) {
-            const images = row.values[10].text.split('\n') || []
+          if (row.values[9]) {
+            const images = row.values[9].text.split('\n') || []
             article_images.push(...images.map(url => {
               return { ffkArticle: article.fid, url }
             }))
