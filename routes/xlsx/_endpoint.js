@@ -5,6 +5,31 @@
 /* eslint-disable indent */
 import Excel from 'exceljs'
 import fs from 'fs'
+import client from 'https'
+
+async function downloadImage({ url, path, name, ext }) {
+
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path, { recursive: true })
+  }
+
+  const filepath = `${path}/${name}.${ext}`
+
+  return new Promise((resolve, reject) => {
+    client.get(url, (res) => {
+      if (res.statusCode === 200) {
+          res.pipe(fs.createWriteStream(filepath))
+              .on('error', reject)
+              .once('close', () => resolve(filepath))
+      } else {
+          // Consume response data to free up memory
+          res.resume()
+          reject(new Error(`Request Failed With a Status Code: ${res.statusCode}`))
+
+      }
+    })
+})
+}
 
 export default function useEndpoint({ connection }) {
 
@@ -165,6 +190,10 @@ export default function useEndpoint({ connection }) {
         // remove the rest
         await query('update section set active = false')
 
+        if (!sections.length) {
+          return sections
+        }
+
         // find rows for update
         const rows_update = await query('select * from section where name in (?)', [sections.map(s => s.name)])
 
@@ -188,6 +217,10 @@ export default function useEndpoint({ connection }) {
 
       async function updateCategories(categories, { sections }) {
         await query('update category set active = false')
+
+        if (!categories.length) {
+          return categories
+        }
 
         // find rows to update
         const rows_update = await query(`
@@ -226,6 +259,10 @@ export default function useEndpoint({ connection }) {
       async function updateArticles(articles, { categories }) {
         await query('update article set active = false')
 
+        if (!articles.length) {
+          return articles
+        }
+
         // find rows to update
         const rows_update = await query('select * from article where code in (?)', [
           articles.map(a => a.code),
@@ -252,6 +289,10 @@ export default function useEndpoint({ connection }) {
 
       async function updateAttributes(attributes, { categories }) {
         await query('update attribute set active = false')
+
+        if (attributes.length === 0) {
+          return attributes
+        }
 
         // find rows to update
         const rows_update = await query(`
@@ -289,6 +330,10 @@ export default function useEndpoint({ connection }) {
 
       async function updateAttributeValues(values, { attributes }) {
         await query('update attribute_value set active = false')
+
+        if (values.length === 0) {
+          return values
+        }
 
         // find rows to update
         const rows_update = await query(`
@@ -336,6 +381,10 @@ export default function useEndpoint({ connection }) {
 
         await query('update nn_article_attribute_value set active = false')
 
+        if (article_values.length === 0) {
+          return article_values
+        }
+
         // find rows to update
         const rows_update = await query(`
           select * from nn_article_attribute_value
@@ -364,6 +413,38 @@ export default function useEndpoint({ connection }) {
         })
       }
 
+      async function updateArticleImages(images, { articles }) {
+        images = images.map(i => {
+          return {
+            url: i.url,
+            fkArticle: articles.find(a => a.fid === i.ffkArticle).id,
+          }
+        })
+
+        const promesas = []
+
+        for (const article of articles) {
+          const path = `files/articles/${article.id}`
+
+          if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true })
+          }
+
+          const article_images = images.filter(i => i.fkArticle === article.id)
+
+          for (let i = 0; i < article_images.length; i++) {
+            const url = article_images[i].url
+            const name = `${Date.now()}${i}`
+            const ext = url.split('.').pop()
+            promesas.push(downloadImage({ url, path, name, ext }))
+          }
+        }
+
+        await Promise.all(promesas)
+
+        return images
+      }
+
       await workbook.xlsx.readFile(request.file.path)
 
       let sections = []
@@ -387,7 +468,10 @@ export default function useEndpoint({ connection }) {
           if (n === 1) return
 
           const row_category = row.values[2]
-          const row_attributes = row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1] || 'SI' }))
+          let row_attributes = []
+          if (row.values[7]) {
+            row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1] || 'SI' }))
+          }
 
           let category = categories.find(c => c.name === row_category && c.ffkSection === section.fid)
           if (!category) {
@@ -407,6 +491,13 @@ export default function useEndpoint({ connection }) {
             description: row.values[9],
           }
           articles.push(article)
+
+          if (row.values[10]) {
+            const images = row.values[10].text.split('\n') || []
+            article_images.push(...images.map(url => {
+              return { ffkArticle: article.fid, url }
+            }))
+          }
 
           for (const row_attribute of row_attributes) {
             let attribute = attributes.find(a => a.name === row_attribute.name && a.ffkCategory === category.fid)
@@ -440,6 +531,7 @@ export default function useEndpoint({ connection }) {
         attributes = await updateAttributes(attributes, { categories })
         values = await updateAttributeValues(values, { attributes })
         article_values = await updateArticleValues(article_values, { articles, values })
+        article_images = await updateArticleImages(article_images, { articles })
 
         await query('COMMIT')
 
@@ -450,6 +542,7 @@ export default function useEndpoint({ connection }) {
           attributes,
           values,
           article_values,
+          article_images,
         }
       } catch (error) {
         await query('ROLLBACK')
