@@ -269,7 +269,18 @@ export default function useEndpoint({ connection }) {
         ])
 
         // upsert sections
-        await query('insert into article (id, active, code, name, value, description, shortDescription, fkCategory) values ? on duplicate key update active = true', [
+        await query(`
+          insert into article (id, active, code, name, value, description, shortDescription, fkCategory) 
+          values ? 
+          on duplicate key update 
+          active = values(active), 
+          code = values(code), 
+          name = values(name), 
+          value = values(value), 
+          description = values(description), 
+          shortDescription = values(shortDescription), 
+          fkCategory = values(fkCategory)
+        `, [
           articles.map(({ active, code, name, value, description, shortDescription, ffkCategory }) => {
             const { id = 0 } = rows_update.find(row => row.code === code) || {}
             const { id: fkCategory } = categories.find(c => c.fid === ffkCategory)
