@@ -178,8 +178,8 @@ export default function useEndpoint({ connection }) {
 
         for (let i = 1; i < header_schema.length; i++) {
           if (header.getCell(i).value !== header_schema[i]) {
-            console.log(header.getCell(i).value)
-            console.log(header_schema[i])
+            console.log(`Esperado: ${header_schema[i]}`)
+            console.log(`Recibido: ${header.getCell(i).value}`)
             throw new Error('El documento no cuenta con el formato requerido')
           }
         }
@@ -221,16 +221,20 @@ export default function useEndpoint({ connection }) {
           return categories
         }
 
+        console.log(sections)
+
         // find rows to update
         const rows_update = await query(`
           select * from category
           where id in (
             select id from category where (${
-              sections.map(section =>
-                format('(fkSection = ? and name in (?))', [
-                  section.id,
-                  categories.filter(c => c.ffkSection === section.fid).map(c => c.name),
-                ])).join('or')
+              sections.map(section => {
+                const categoryNames = categories.filter(c => c.ffkSection === section.fid).map(c => c.name)
+                if (categoryNames.length) {
+                  return format('(fkSection = ? and name in (?))', [section.id, categoryNames])
+                }
+                return format('(fkSection = ?)', [section.id])
+              }).join('or')
             })
           )
         `)
