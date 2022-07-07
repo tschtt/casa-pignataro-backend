@@ -172,7 +172,7 @@ export default function useEndpoint({ connection }) {
 
       function validateSheet(sheet) {
         const header = sheet.getRow(1)
-        const header_schema = [, 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion', 'Descripcion Breve', 'Imagenes']
+        const header_schema = [, 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion Breve', 'Descripcion', 'Imagenes']
 
         for (let i = 1; i < header_schema.length; i++) {
           if (header.getCell(i).value !== header_schema[i]) {
@@ -297,7 +297,7 @@ export default function useEndpoint({ connection }) {
         })
       }
 
-      async function updateAttributes(attributes, { categories }) {
+      async function updateAttributes(attributes, { categories }) {        
         await query('update attribute set active = false')
 
         if (attributes.length === 0) {
@@ -309,11 +309,17 @@ export default function useEndpoint({ connection }) {
           select * from attribute
           where id in (
             select id from attribute where (${
-              categories.map(category =>
-                format('(fkCategory = ? and name in (?))', [
-                  category.id,
-                  attributes.filter(a => a.ffkCategory === category.fid).map(a => a.name),
-                ])).join('or')
+              categories.map(category => {
+                const attributeNames = attributes.filter(a => a.ffkCategory === category.fid).map(a => a.name)
+                if(attributeNames.length > 0) {
+                  return format('(fkCategory = ? and name in (?))', [
+                    category.id,
+                    attributeNames
+                  ])
+                } else {
+                  return null
+                }
+              }).filter(value => value !== null).join('or')
             })
           )
         `)
@@ -438,13 +444,15 @@ export default function useEndpoint({ connection }) {
 
           if (!fs.existsSync(path)) {
             fs.mkdirSync(path, { recursive: true })
-          } else {
-            fs.rmSync(path, { recursive: true })
-            fs.mkdirSync(path, { recursive: true })
           }
 
           const article_images = images.filter(i => i.fkArticle === article.id)
 
+          if(article_images.length > 0) {
+            fs.rmSync(path, { recursive: true })
+            fs.mkdirSync(path, { recursive: true })
+          }
+          
           for (let i = 0; i < article_images.length; i++) {
             const url = article_images[i].url
             const name = `${Date.now()}${i}`
@@ -481,9 +489,10 @@ export default function useEndpoint({ connection }) {
           if (n === 1) return
 
           const row_category = row.values[1]
+
           let row_attributes = []
-          if (row.values[7]) {
-            row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1] || 'SI' }))
+          if (row.values[6]) {
+            row_attributes = row.values[6].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1] || 'SI' }))
           }
 
           let category = categories.find(c => c.name.trim() === row_category.trim() && c.ffkSection === section.fid)
