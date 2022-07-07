@@ -3,32 +3,31 @@
 /* eslint-disable no-unneeded-ternary */
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable indent */
+/* eslint-disable */
+
 import Excel from 'exceljs'
 import fs from 'fs'
 import client from 'https'
 
 async function downloadImage({ url, path, name, ext }) {
-
   if (!fs.existsSync(path)) {
     fs.mkdirSync(path, { recursive: true })
   }
 
-  const filepath = `${path}/${name}.${ext}`
-
   return new Promise((resolve, reject) => {
     client.get(url, (res) => {
       if (res.statusCode === 200) {
-          res.pipe(fs.createWriteStream(filepath))
-              .on('error', reject)
-              .once('close', () => resolve(filepath))
+        const filetype = res.headers['content-type'].split('/')[1]
+        res
+          .pipe(fs.createWriteStream(`${path}/${name}.${filetype}`))
+          .on('error', reject)
+          .once('close', () => resolve(`${path}/${name}.${filetype}`))
       } else {
-          // Consume response data to free up memory
-          res.resume()
-          reject(new Error(`Request Failed With a Status Code: ${res.statusCode}`))
-
+        res.resume()
+        resolve('')
       }
     })
-})
+  }) 
 }
 
 export default function useEndpoint({ connection }) {
@@ -110,7 +109,6 @@ export default function useEndpoint({ connection }) {
 
   async function query(sql, values) {
     sql = format(sql, values)
-    console.log(`${sql}\n`)
     const result = await connection.query(sql)
     return result[0]
   }
@@ -174,7 +172,7 @@ export default function useEndpoint({ connection }) {
 
       function validateSheet(sheet) {
         const header = sheet.getRow(1)
-        const header_schema = [, 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion Breve', 'Descripcion', 'Imagenes']
+        const header_schema = [, 'Categoría', 'Activo', 'Codigo', 'Nombre', 'Valor', 'Atributos', 'Descripcion', 'Descripcion Breve', 'Imagenes']
 
         for (let i = 1; i < header_schema.length; i++) {
           if (header.getCell(i).value !== header_schema[i]) {
@@ -439,6 +437,9 @@ export default function useEndpoint({ connection }) {
           const path = `files/articles/${article.id}`
 
           if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true })
+          } else {
+            fs.rmSync(path, { recursive: true })
             fs.mkdirSync(path, { recursive: true })
           }
 
