@@ -480,15 +480,15 @@ export default function useEndpoint({ connection }) {
         sheet.eachRow((row, n) => {
           if (n === 1) return
 
-          const row_category = row.values[2]
+          const row_category = row.values[1]
           let row_attributes = []
           if (row.values[7]) {
             row.values[7].split('\n').map(v => v.split(': ')).map(v => ({ name: v[0], value: v[1] || 'SI' }))
           }
 
-          let category = categories.find(c => c.name === row_category && c.ffkSection === section.fid)
+          let category = categories.find(c => c.name.trim() === row_category.trim() && c.ffkSection === section.fid)
           if (!category) {
-            category = { fid: categories.length + 1, ffkSection: section.fid, name: row_category }
+            category = { fid: categories.length + 1, ffkSection: section.fid, name: row_category.trim() }
             categories.push(category)
           }
 
