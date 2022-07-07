@@ -221,8 +221,6 @@ export default function useEndpoint({ connection }) {
           return categories
         }
 
-        console.log(sections)
-
         // find rows to update
         const rows_update = await query(`
           select * from category

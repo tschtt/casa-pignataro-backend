@@ -3,9 +3,13 @@ const PAGE_SIZE = parseInt(process.env.DATABASE_PAGE_SIZE)
 
 export default ({ connection, builder: build }) => (table) => ({
 
+  async raw(sql, values) {
+    const result = await connection.query(sql, values)
+    return result[0]
+  },
+
   async query(query = {}) {
     const sql = build(query)
-    console.log(sql)
     const result = query.$join || query.$join_active
       ? await connection.query({ sql, nestTables: true })
       : await connection.query(sql)

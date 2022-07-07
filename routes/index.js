@@ -6,6 +6,7 @@ import articles from './articles/index.js'
 import contact from './contact/index.js'
 import session from './session/index.js'
 import sections from './sections/index.js'
+import v2 from './v2/index.js'
 import xlsx from './xlsx/index.js'
 
 export default useApp({
@@ -16,6 +17,7 @@ export default useApp({
   '/session': session,
   '/sections': sections,
   '/files': express.static('files'),
+  '/v2': v2,
   '/': {
     get: () => ({
       success: true,
